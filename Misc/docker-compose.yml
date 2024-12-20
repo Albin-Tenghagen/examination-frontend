@@ -1,0 +1,11 @@
+version: "3.8"
+
+services:
+  web:
+    image: nginx:latest
+    container_name: nginx_examination 
+    ports:
+      - "8080:80" # Map port 80 in the container to port 8080 on the host
+    volumes:
+      - .:/usr/share/nginx/html:ro # Mount the HTML directory to serve static files
+    restart: always
