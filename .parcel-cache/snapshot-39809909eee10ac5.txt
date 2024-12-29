@@ -1,0 +1,12 @@
+11
+60/home/albin/Projekt/chassi/frontend/examination-frontend/img1734728524529213417 1
+74/home/albin/Projekt/chassi/frontend/examination-frontend/html/explore.html1735385660394854089 0
+61/home/albin/Projekt/chassi/frontend/examination-frontend/html1734724716656414090 1
+70/home/albin/Projekt/chassi/frontend/examination-frontend/css/style.css1735412225171804969 0
+60/home/albin/Projekt/chassi/frontend/examination-frontend/css1734724762438011197 1
+66/home/albin/Projekt/chassi/frontend/examination-frontend/README.md1734725893571901221 0
+72/home/albin/Projekt/chassi/frontend/examination-frontend/html/index.html1735416671803537264 0
+68/home/albin/Projekt/chassi/frontend/examination-frontend/js/index.js1735479356989487029 0
+59/home/albin/Projekt/chassi/frontend/examination-frontend/js1734724877054524395 1
+61/home/albin/Projekt/chassi/frontend/examination-frontend/Misc1735486006414407337 1
+56/home/albin/Projekt/chassi/frontend/examination-frontend1735489370922102028 1
