@@ -1,4 +1,4 @@
-console.log('JavaScript file loaded correctly')
+console.log("JavaScript file loaded correctly")
 
 //* Global Variables down below
 const itemsPerPage = 12;
@@ -17,11 +17,11 @@ let spotlightArray = [];
 let movieWatchListArray = [];
 
 const movieObject = {
-    movieObjectId: undefined,
-    movieObjectTitle: "",
-    movieObjectOverview: "",
-    movieObjectImg: undefined,
-    movieObjectRelease: ""
+    id: undefined,
+    title: "",
+    overview: "",
+    img: undefined,
+    release: ""
 }
 
 //*---------------
@@ -29,13 +29,17 @@ const movieObject = {
 //*   DOM Creation
 const spotlightSection = document.getElementById("spotlightSection");
 
-const watchListContainer = document.getElementsByClassName("watchListContainer");
+const watchListContainer = document.getElementById("watchListContainer");
 
 //*---------------
-//!
-movieApiFetch()
+
+window.addEventListener("DOMContentLoaded", async function setup(event) {
+    movieApiFetch()
+    displayWatchlist()
+})
+
 async function movieApiFetch() {
-    console.log("fetching data from OMDB API")
+    console.log("fetching data from TMDB API")
     try {
         const response = await fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&include_adult=false&include_video=false&language=en-US&page=${currentPage}&sort_by=popularity.desc`)
 
@@ -65,31 +69,6 @@ async function movieApiFetch() {
 
     }
 }
-// async function spotlightMovieFetch() {
-//     try {
-//         const response = await fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&include_adult=false&include_video=false&language=en-US&page=1&sort_by=popularity.desc`)
-
-//         if(!response.ok){
-//             errorMessage(response)
-//             return;
-//         }
-        
-//         const movieData = await response.json();
-//         console.log(movieData)
-        
-//         movieArray = movieData.result;
-//         console.log(movieArray.length)
-//         // for (let index = 0; index < 10; index++) {
-//         //     createSpotlightObject(movieData.result)
-            
-//         // }
-//     } catch (err) {
-        
-//         console.error("Error fetching data:", err.message)
-//         errorMessage()
-
-//     }
-// }   
 
 function createMovieObject(movie){
     const movieContainer = document.createElement("article")
@@ -135,25 +114,25 @@ function createWatchlistObject(movie){
     const movieContainer = document.createElement("article")
     movieContainer.setAttribute("class", "movieContainer")
     //TODO FIX SO THE FUNCTION CAN PLACE THE ARTICLES IN DIFFERENT NODES
-    spotlightSection.appendChild(movieContainer)
+    watchListContainer.appendChild(movieContainer)
 
 
     //* original_title
     const movieTitle = document.createElement("h4")
-    movieTitle.textContent = movie.original_title
+    movieTitle.textContent = movie.title
     movieTitle.setAttribute("class", "movieTitle")
     movieContainer.appendChild(movieTitle)
 
     //* Save to localStorage button
     const watchlistButton = document.createElement("button")
-    watchlistButton.setAttribute("class", "watchlistButton")
-    watchlistButton.textContent = "Add to Watchlist"
+    watchlistButton.setAttribute("class", "removeButton")
+    watchlistButton.textContent = "remove"
     movieContainer.appendChild(watchlistButton)
 
     //* backdrop_path 
     const movieImg = document.createElement("img") 
-    movieImg.setAttribute("src", `https://image.tmdb.org/t/p/w500${movie.poster_path}`)
-    movieImg.setAttribute("alt", movie.original_title)
+    movieImg.setAttribute("src", `${movie.img}`)
+    movieImg.setAttribute("alt", movie.title)
     movieImg.setAttribute("class", "movieImg")
     movieContainer.appendChild(movieImg)
     
@@ -165,78 +144,85 @@ function createWatchlistObject(movie){
     
     //* release_date
     const movieRelease = document.createElement("p")
-    movieRelease.textContent = movie.release_date;
+    movieRelease.textContent = movie.release;
     movieRelease.setAttribute("class", "movieRelease")
     movieContainer.appendChild(movieRelease)
     
 
 }
 
-//TODO Function that can save Movies to your watch list by stringifying it to localStorage, and on WindowLoaded should then decypher the data and create DOM elements in the WatchListContainer
+//* Function that can save Movies to your watch list by stringifying it to localStorage, and on WindowLoaded should then decypher the data and create DOM elements in the WatchListContainer
 spotlightSection.addEventListener("click", function (event){
-    if (event.target.classList.contains('watchlistButton')) {
-        event.preventDefault()
-        console.log("WatchlistButton pressed just now")
-        // Chooses the elements closest to the watchlistButton that was pressed.
-        const movieContainer = event.target.closest('.movieContainer');
-        const movieTitle = movieContainer.querySelector('.movieTitle').textContent;
-        const movieOverview = movieContainer.querySelector('.moviePlot').textContent;
-        const movieRelease = movieContainer.querySelector('.movieRelease').textContent;
-        const movieImg = movieContainer.querySelector('.movieImg').src;
+    if (event.target.classList.contains("watchlistButton")) {
 
+           console.log("WatchlistButton pressed just now")
+           // Chooses the elements closest to the watchlistButton that was pressed.
+           const movieContainer = event.target.closest(".movieContainer");
+           const movieTitle = movieContainer.querySelector(".movieTitle").textContent;
+           const movieOverview = movieContainer.querySelector(".moviePlot").textContent;
+           const movieRelease = movieContainer.querySelector(".movieRelease").textContent;
+           const movieImg = movieContainer.querySelector(".movieImg").src;
+
+        
         // Create a movie object to stringify to JSON
-        const movieLocalData = {
-            movieTitle: movieTitle,
-            movieOverview: movieOverview,
-            movieRelease: movieRelease,
-            movieImg: movieImg        
+        const localMovie = {
+            title: movieTitle,
+            overview: movieOverview,
+            release: movieRelease,
+            img: movieImg        
         }
-        localStorageAddition(movieLocalData)
+        localStorageAddition(localMovie)
     }   
 })
 
-
-
-
-
-async function errorMessage() {
-    // switch (status.value) {
-    //     case False:
-            //?Ska innehålla response false
-    //         break;
+function localStorageAddition(localMovie){
+   if (localStorage.key(`${localMovie.title}-${localMovie.release}` !== `${localMovie.title}-${localMovie.release}`)) {
+    //TODO More flashy error handling needed   
+    alert("item already added to watchlist")
     
-    //     default:
-    //         break;
-    // }
-}
-function objectCreation(movie){
-    const generalMovieObject = Object.create(movieObject)
-    generalMovieObject.movieObjectId = movie.id
-    generalMovieObject.movieObjectTitle = movie.original_title
-    generalMovieObject.movieObjectOverview = movie.overview
-    generalMovieObject.movieObjectImg = movie.poster_path
-    generalMovieObject.movieObjectRelease = movie.release_date
-
-    objectManipulationArray.push(generalMovieObject)
-    
-
-}
-// console.log("objectManipulationArray", objectManipulationArray)
-
-function localStorageAddition(movieLocalData){
-    const watchlistedMovie = Object.create(movieObject);
-
-    watchlistedMovie.movieObjectTitle = movieLocalData.movieTitle
-    watchlistedMovie.movieObjectOverview = movieLocalData.movieOverview
-    watchlistedMovie.movieObjectImg = movieLocalData.movieImg
-    watchlistedMovie.movieObjectRelease = movieLocalData.movieRelease
-
-    const uniqueKey = `${watchlistedMovie.movieObjectTitle}-${watchlistedMovie.movieObjectRelease}`
-    localStorage.setItem(uniqueKey, JSON.stringify(watchlistedMovie))
+} else {
+    const uniqueKey = `${localMovie.title}-${localMovie.release}`
+    localStorage.setItem(uniqueKey, JSON.stringify(localMovie))
     console.log("Item succesfully put in localStorage")
     displayWatchlist()
-    
+    }
+        
 }
+
+//* Function that is tied to the remove button, so you can remove Movies in your watchlist. 
+watchListContainer.addEventListener("click", function(event) {
+    console.log("remove button pressed")
+    //*If event checks to see if there is a remove button in watchListContainer
+    if(event.target.classList.contains("removeButton")) {
+        //* And with queryselector it finds the  DOM elements, that are then passed to keys for localMovie
+        const movieContainer = event.target.closest(".movieContainer");
+        const movieTitle = movieContainer.querySelector(".movieTitle").textContent;
+        const movieOverview = movieContainer.querySelector(".moviePlot").textContent;
+        const movieRelease = movieContainer.querySelector(".movieRelease").textContent;
+        const movieImg = movieContainer.querySelector(".movieImg").src;
+           
+        // Create a movie object to stringify to JSON
+        const localMovie = {
+            title: movieTitle,
+            overview: movieOverview,
+            release: movieRelease,
+            img: movieImg        
+        }
+        //* Calls this function with the parameters of the localMovie Object 
+        localStorageSubtraction(localMovie, movieContainer)
+    }
+})
+
+function localStorageSubtraction(localMovie, movieContainer) {
+    console.log("it came to here")
+    //* It takes the keys (title and release) of localMovie. And removes the movie from local Storage, While also removing the movie article container 
+    const uniqueKey = `${localMovie.title}-${localMovie.release}`
+    localStorage.removeItem(uniqueKey)
+
+    watchListContainer.removeChild(movieContainer)
+
+}
+
 
 function displayWatchlist(){
     console.log("Watchlist function called")
@@ -248,5 +234,36 @@ function displayWatchlist(){
             console.log("WatchlistedMovie", movie)
             createWatchlistObject(movie)
         }
+    }
+}
+
+function objectCreation(movie){
+    console.log("Object creation function called")
+    const generalMovieObject = Object.create(movieObject)
+    generalMovieObject.id = movie.id
+    generalMovieObject.title = movie.original_title
+    generalMovieObject.overview = movie.overview
+    generalMovieObject.img = movie.poster_path
+    generalMovieObject.release = movie.release_date
+
+    objectManipulationArray.push(generalMovieObject)
+    
+
+}
+// console.log("objectManipulationArray", objectManipulationArray)
+
+function apiError(status) {
+    switch (status) {
+        case 401:
+            alert("Unauthorized! Check your API key.");
+            break;
+        case 404:
+            alert("Resource not found!");
+            break;
+        case 500:
+            alert("Server error. Try again later.");
+            break;
+        default:
+            alert("Something went wrong.");
     }
 }
