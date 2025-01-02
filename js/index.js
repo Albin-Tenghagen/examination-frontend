@@ -2,19 +2,21 @@ console.log("JavaScript file loaded correctly")
 
 //* Global Variables down below
 const itemsPerPage = 12;
-let currentPage = 1;
+// let currentPage = 1;
 
 const apiUrl = "https://api.themoviedb.org/3?"
 const exploringEndpoint = "discover/movie"
 const apiKey = "3cb0d2bc09efade109b0b6a67290e815"
 
-let movieArray = [];
-
 let objectManipulationArray = [];
+
+let movieArray = [];
 
 let spotlightArray = [];
 
 let movieWatchListArray = [];
+
+let exploreArray = []; 
 
 const movieObject = {
     id: undefined,
@@ -26,30 +28,61 @@ const movieObject = {
 
 //*---------------
 
+
 //*   DOM Creation
 const spotlightSection = document.getElementById("spotlightSection");
 
 const watchListContainer = document.getElementById("watchListContainer");
 
+const exploreContainer = document.getElementById("exploreContainer");
+
 //*---------------
 
 window.addEventListener("DOMContentLoaded", async function setup(event) {
-    movieApiFetch()
-    displayWatchlist()
+    console.log("DOMContentLoaded called")
+    checkUserPage()
 })
 
+async function checkUserPage() {
+    // declares current page being visited
+    const currentPage = window.location.pathname;
+    
+    //* Calls all relevant functions based on where user is located
+    if(currentPage.endsWith("index.html") ){
+        console.log("user is visiting index.html")
+        await movieApiFetch()
+
+        if (watchListContainer) {
+            displayWatchlist();
+        }
+
+    } else {
+        console.log("user is visiting explore.html")
+       await movieApiFetch()
+       
+       await movieExploreFetch()
+       
+       if (watchListContainer) {
+         displayWatchlist();
+        }
+        
+    }
+    
+}
+
+//TODO change to be specifiacally spotlight
 async function movieApiFetch() {
     console.log("fetching data from TMDB API")
     try {
-        const response = await fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&include_adult=false&include_video=false&language=en-US&page=${currentPage}&sort_by=popularity.desc`)
+        const response = await fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&include_adult=false&include_video=false&language=en-US&page=1&sort_by=popularity.desc`)
 
         if(!response.ok){
-            errorMessage(response)
+            apiError(response)
             return;
         }
         
         const movieData = await response.json();
-        
+        //TODO remove movie array step
         movieArray = movieData.results;
         movieArray.forEach(movie => {
             objectCreation(movie)
@@ -65,12 +98,12 @@ async function movieApiFetch() {
     } catch (err) {
         
         console.error("Error fetching data:", err.message)
-        errorMessage()
+        apiError()
 
     }
 }
 
-function createMovieObject(movie){
+function createSpotlightObject(movie){
     const movieContainer = document.createElement("article")
     movieContainer.setAttribute("class", "movieContainer")
     //TODO FIX SO THE FUNCTION CAN PLACE THE ARTICLES IN DIFFERENT NODES
@@ -151,6 +184,46 @@ function createWatchlistObject(movie){
 
 }
 
+function createExploreObject(movie) {
+    const movieContainer = document.createElement("article")
+    movieContainer.setAttribute("class", "movieContainer")
+    //TODO FIX SO THE FUNCTION CAN PLACE THE ARTICLES IN DIFFERENT NODES
+    exploreContainer.appendChild(movieContainer)
+
+
+    //* original_title
+    const movieTitle = document.createElement("h4")
+    movieTitle.textContent = movie.original_title
+    movieTitle.setAttribute("class", "movieTitle")
+    movieContainer.appendChild(movieTitle)
+
+    //* Save to localStorage button
+    const watchlistButton = document.createElement("button")
+    watchlistButton.setAttribute("class", "watchlistButton")
+    watchlistButton.textContent = "Add to Watchlist"
+    movieContainer.appendChild(watchlistButton)
+
+    //* backdrop_path 
+    const movieImg = document.createElement("img") 
+    movieImg.setAttribute("src", `https://image.tmdb.org/t/p/w500${movie.poster_path}`)
+    movieImg.setAttribute("alt", movie.original_title)
+    movieImg.setAttribute("class", "movieImg")
+    movieContainer.appendChild(movieImg)
+    
+    //* overview
+    const moviePlot = document.createElement("p")
+    moviePlot.textContent = movie.overview
+    moviePlot.setAttribute("class", "moviePlot")
+    movieContainer.appendChild(moviePlot)
+    
+    //* release_date
+    const movieRelease = document.createElement("p")
+    movieRelease.textContent = movie.release_date;
+    movieRelease.setAttribute("class", "movieRelease")
+    movieContainer.appendChild(movieRelease)
+    
+
+}
 //* Function that can save Movies to your watch list by stringifying it to localStorage, and on WindowLoaded should then decypher the data and create DOM elements in the WatchListContainer
 spotlightSection.addEventListener("click", function (event){
     if (event.target.classList.contains("watchlistButton")) {
@@ -171,6 +244,7 @@ spotlightSection.addEventListener("click", function (event){
             release: movieRelease,
             img: movieImg        
         }
+        //TODO återkoppling på knappttryck
         localStorageAddition(localMovie)
     }   
 })
@@ -270,44 +344,83 @@ function apiError(status) {
 
 
 //! Next step is: 
-/* Async planning
-SÅ SOM
-            OBS!    [filter by],
-            
-            filter by  in exploringContainer.
-            When the user presses filter by button (onclick)
-            
-            Dropdown nodeElement shoud display 4 or more buttons for different  parameters 
-            they should be handled with a switch case to get the corresponding endpoint/parameter
-            
-            possible endpoint = https://developer.themoviedb.org/reference/genre-movie-list 
-            
-            possible endpoint https://developer.themoviedb.org/reference/discover-movie
+// Async planning
 
-            Possible endpoint = https://developer.themoviedb.org/reference/movie-popular-list
+// SÅ SOM
+//             OBS!    [filter by],
+            
+//             filter by  in exploringContainer.
+//             When the user presses filter by button (onclick)
+            
+//             Dropdown nodeElement shoud display 4 or more buttons for different  parameters 
+//             they should be handled with a switch case to get the corresponding endpoint/parameter
+            
+//             possible endpoint = https://developer.themoviedb.org/reference/genre-movie-list 
+            
+//             possible endpoint https://developer.themoviedb.org/reference/discover-movie
+
+//             Possible endpoint = https://developer.themoviedb.org/reference/movie-popular-list
 
 
-            OBS!    [searchinput].
+//             OBS!    [searchinput].
                 
-                Search endpoint https://developer.themoviedb.org/reference/search-movie
+//                 Search endpoint https://developer.themoviedb.org/reference/search-movie
 
 
-            function that takes user input to search for a movie by title and populates the explore container with possible results
+//             function that takes user input to search for a movie by title and populates the explore container with possible results
             
-            headerinput should make a a search in movielist(GlobalSearch) or smth alike, If user on home, open explore tab and results should display in explore
+//             headerinput should make a a search in movielist(GlobalSearch) or smth alike, If user on home, open explore tab and results should display in explore
 
-            search inpput in explore --> main section should search by title in current endpoint being displayed(LocalSearch)
-
-
-
-            OBS!    [Hämta flera pages från api med promise.all]
-            async function that should fetch several pages from the API and handle all the results with promise.all
-
-
-            OBS! when clicking a movie object, it could fetch the reviews for the movie in a modal of some kind
-                    https://developer.themoviedb.org/reference/review-details
+//             search inpput in explore --> main section should search by title in current endpoint being displayed(LocalSearch)
 
 
 
+//             OBS!    [Hämta flera pages från api med promise.all]
+//             async function that should fetch several pages from the API and handle all the results with promise.all
 
-*/
+
+//             OBS! when clicking a movie object, it could fetch the reviews for the movie in a modal of some kind
+//             https://developer.themoviedb.org/reference/review-details
+            
+// }
+        
+
+async function movieExploreFetch() {
+    //TODO function fetching pages with option to load more.
+    try {
+        const totalPages = 5 
+        fetchArray = [] ;
+        for(let i = 0; i >= totalPages; i++){
+           
+            fetchArray.push(fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&include_adult=false&include_video=false&language=en-US&page=${i}&sort_by=popularity.desc`))  
+           console.log(`Page: ${i} pushed to be fetched`) 
+
+        }
+
+        const responses = await Promise.all(fetchArray)
+        
+        const rejectedPromise = responses.find((response) => !response.ok)
+
+        if(rejectedPromise) {
+            console.error(`Error when fetching pages: ${responses.indexof(rejectedPromise) + 1} `)
+            apiError(rejectedPromise.status)
+            return
+        }
+        
+        const movieData = await Promise.all(responses.map((response) => response.json))
+
+        //combines the pages to a single array
+        exploreArray = movieData.flat((data) => data.results) 
+        
+        exploreArray.forEach(movie => {
+            createExploreObject(movie)
+        })
+
+
+    } catch (error) {
+        console.error("Error fetching data:", error.message)
+        apiError()
+    }
+    
+    //TODO Switch for sort by or alike maybe?
+}
