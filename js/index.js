@@ -267,3 +267,47 @@ function apiError(status) {
             alert("Something went wrong.");
     }
 }
+
+
+//! Next step is: 
+/* Async planning
+SÅ SOM
+            OBS!    [filter by],
+            
+            filter by  in exploringContainer.
+            When the user presses filter by button (onclick)
+            
+            Dropdown nodeElement shoud display 4 or more buttons for different  parameters 
+            they should be handled with a switch case to get the corresponding endpoint/parameter
+            
+            possible endpoint = https://developer.themoviedb.org/reference/genre-movie-list 
+            
+            possible endpoint https://developer.themoviedb.org/reference/discover-movie
+
+            Possible endpoint = https://developer.themoviedb.org/reference/movie-popular-list
+
+
+            OBS!    [searchinput].
+                
+                Search endpoint https://developer.themoviedb.org/reference/search-movie
+
+
+            function that takes user input to search for a movie by title and populates the explore container with possible results
+            
+            headerinput should make a a search in movielist(GlobalSearch) or smth alike, If user on home, open explore tab and results should display in explore
+
+            search inpput in explore --> main section should search by title in current endpoint being displayed(LocalSearch)
+
+
+
+            OBS!    [Hämta flera pages från api med promise.all]
+            async function that should fetch several pages from the API and handle all the results with promise.all
+
+
+            OBS! when clicking a movie object, it could fetch the reviews for the movie in a modal of some kind
+                    https://developer.themoviedb.org/reference/review-details
+
+
+
+
+*/
