@@ -8,6 +8,7 @@ const apiUrl = "https://api.themoviedb.org/3?"
 const exploringEndpoint = "discover/movie"
 const apiKey = "3cb0d2bc09efade109b0b6a67290e815"
 
+//!TA bort?
 let objectManipulationArray = [];
 
 let movieArray = [];
@@ -49,17 +50,20 @@ async function checkUserPage() {
     
     //* Calls all relevant functions based on where user is located
     if(currentPage.endsWith("index.html") ){
+        //TODO make it so that spotlight can also be displayed on explore
         console.log("user is visiting index.html")
         await movieApiFetch()
 
+        console.log("exploreArray", exploreArray)
+        
         if (watchListContainer) {
             displayWatchlist();
         }
 
     } else {
         console.log("user is visiting explore.html")
-       await movieApiFetch()
-       
+        console.log("spotlightArray", spotlightArray)
+
        await movieExploreFetch()
        
        if (watchListContainer) {
@@ -92,7 +96,7 @@ async function movieApiFetch() {
         spotlightArray = movieArray.slice(0, 10)
         console.log("spotlightArray", spotlightArray)
         spotlightArray.forEach(movie => {
-            createMovieObject(movie)
+            createSpotlightObject(movie)
         });
     
     } catch (err) {
@@ -343,54 +347,13 @@ function apiError(status) {
 }
 
 
-//! Next step is: 
-// Async planning
-
-// SÅ SOM
-//             OBS!    [filter by],
-            
-//             filter by  in exploringContainer.
-//             When the user presses filter by button (onclick)
-            
-//             Dropdown nodeElement shoud display 4 or more buttons for different  parameters 
-//             they should be handled with a switch case to get the corresponding endpoint/parameter
-            
-//             possible endpoint = https://developer.themoviedb.org/reference/genre-movie-list 
-            
-//             possible endpoint https://developer.themoviedb.org/reference/discover-movie
-
-//             Possible endpoint = https://developer.themoviedb.org/reference/movie-popular-list
-
-
-//             OBS!    [searchinput].
-                
-//                 Search endpoint https://developer.themoviedb.org/reference/search-movie
-
-
-//             function that takes user input to search for a movie by title and populates the explore container with possible results
-            
-//             headerinput should make a a search in movielist(GlobalSearch) or smth alike, If user on home, open explore tab and results should display in explore
-
-//             search inpput in explore --> main section should search by title in current endpoint being displayed(LocalSearch)
-
-
-
-//             OBS!    [Hämta flera pages från api med promise.all]
-//             async function that should fetch several pages from the API and handle all the results with promise.all
-
-
-//             OBS! when clicking a movie object, it could fetch the reviews for the movie in a modal of some kind
-//             https://developer.themoviedb.org/reference/review-details
-            
-// }
-        
 
 async function movieExploreFetch() {
     //TODO function fetching pages with option to load more.
     try {
         const totalPages = 5 
         fetchArray = [] ;
-        for(let i = 0; i >= totalPages; i++){
+        for(let i = 1; i <= totalPages; i++){
            
             fetchArray.push(fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&include_adult=false&include_video=false&language=en-US&page=${i}&sort_by=popularity.desc`))  
            console.log(`Page: ${i} pushed to be fetched`) 
@@ -402,16 +365,17 @@ async function movieExploreFetch() {
         const rejectedPromise = responses.find((response) => !response.ok)
 
         if(rejectedPromise) {
-            console.error(`Error when fetching pages: ${responses.indexof(rejectedPromise) + 1} `)
+            console.error(`Error when fetching pages: ${responses.indexOf(rejectedPromise) + 1} `)
             apiError(rejectedPromise.status)
             return
         }
         
-        const movieData = await Promise.all(responses.map((response) => response.json))
+        const movieData = await Promise.all(responses.map((response) => response.json()))
 
         //combines the pages to a single array
-        exploreArray = movieData.flat((data) => data.results) 
+        exploreArray = movieData.flatMap((data) => data.results);
         
+        console.log("exploreArray", exploreArray)
         exploreArray.forEach(movie => {
             createExploreObject(movie)
         })
@@ -421,6 +385,54 @@ async function movieExploreFetch() {
         console.error("Error fetching data:", error.message)
         apiError()
     }
-    
+                
     //TODO Switch for sort by or alike maybe?
 }
+
+
+//*filter by genre for the filter function. 
+//in the same endpoint Check movieobjects key: genre_ids. with a numerical value(or array of several)
+
+// when for example the fantasy genre button should handle an switch case if pressed it should give value of 18 and the fetch paramters will be adjusted accordingly 1
+
+
+            //! Next step is: 
+            // Async planning
+            
+            // SÅ SOM
+            //             OBS!    [filter by],
+                        
+            //             filter by  in exploringContainer.
+            //             When the user presses filter by button (onclick)
+                        
+            //             Dropdown nodeElement shoud display 4 or more buttons for different  parameters 
+            //             they should be handled with a switch case to get the corresponding endpoint/parameter
+                        
+            //             possible endpoint = https://developer.themoviedb.org/reference/genre-movie-list 
+                        
+            //             possible endpoint https://developer.themoviedb.org/reference/discover-movie
+            
+            //             Possible endpoint = https://developer.themoviedb.org/reference/movie-popular-list
+            
+            
+            //             OBS!    [searchinput].
+                            
+            //                 Search endpoint https://developer.themoviedb.org/reference/search-movie
+            
+            
+            //             function that takes user input to search for a movie by title and populates the explore container with possible results
+                        
+            //             headerinput should make a a search in movielist(GlobalSearch) or smth alike, If user on home, open explore tab and results should display in explore
+            
+            //             search inpput in explore --> main section should search by title in current endpoint being displayed(LocalSearch)
+            
+            
+            
+            //             OBS!    [Hämta flera pages från api med promise.all]
+            //             async function that should fetch several pages from the API and handle all the results with promise.all
+            
+            
+            //             OBS! when clicking a movie object, it could fetch the reviews for the movie in a modal of some kind
+            //             https://developer.themoviedb.org/reference/review-details
+                        
+            // }
