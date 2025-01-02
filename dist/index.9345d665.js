@@ -22,7 +22,7 @@ const movieObject = {
 //*   DOM Creation
 const spotlightSection = document.getElementById("spotlightSection");
 const watchListContainer = document.getElementById("watchListContainer");
-const exploreContainer = document.getElementById("exploreContainer");
+// const exploreContainer = document.getElementById("exploreContainer");
 //*---------------
 window.addEventListener("DOMContentLoaded", async function setup(event) {
     console.log("DOMContentLoaded called");
@@ -41,10 +41,13 @@ async function checkUserPage() {
     } else {
         console.log("user is visiting explore.html");
         console.log("spotlightArray", spotlightArray);
+        console.log("filterSetup called from userCheck");
+        filteringSetup(filterButton, dropdownOptions);
         await movieExploreFetch();
         if (watchListContainer) displayWatchlist();
     }
 }
+//* fetch functions-------------------
 //TODO change to be specifiacally spotlight
 async function movieApiFetch() {
     console.log("fetching data from TMDB API");
@@ -71,6 +74,37 @@ async function movieApiFetch() {
         apiError();
     }
 }
+async function movieExploreFetch() {
+    //TODO function fetching pages with option to load more.
+    try {
+        const totalPages = 5;
+        fetchArray = [];
+        for(let i = 1; i <= totalPages; i++){
+            fetchArray.push(fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&include_adult=false&include_video=false&language=en-US&page=${i}&sort_by=popularity.desc`));
+            console.log(`Page: ${i} pushed to be fetched`);
+        }
+        const responses = await Promise.all(fetchArray);
+        const rejectedPromise = responses.find((response)=>!response.ok);
+        if (rejectedPromise) {
+            console.error(`Error when fetching pages: ${responses.indexOf(rejectedPromise) + 1} `);
+            apiError(rejectedPromise.status);
+            return;
+        }
+        const movieData = await Promise.all(responses.map((response)=>response.json()));
+        //combines the pages to a single array
+        exploreArray = movieData.flatMap((data)=>data.results);
+        console.log("exploreArray", exploreArray);
+        exploreArray.forEach((movie)=>{
+            createExploreObject(movie);
+        });
+    } catch (error) {
+        console.error("Error fetching data:", error.message);
+        apiError();
+    }
+//TODO Switch for sort by or alike maybe?
+}
+//-------------------
+//* DOM manipulation-------------------
 function createSpotlightObject(movie) {
     const movieContainer = document.createElement("article");
     movieContainer.setAttribute("class", "movieContainer");
@@ -167,6 +201,8 @@ function createExploreObject(movie) {
     movieRelease.setAttribute("class", "movieRelease");
     movieContainer.appendChild(movieRelease);
 }
+//-------------------
+//* Watch List ------------------------
 //* Function that can save Movies to your watch list by stringifying it to localStorage, and on WindowLoaded should then decypher the data and create DOM elements in the WatchListContainer
 spotlightSection.addEventListener("click", function(event) {
     if (event.target.classList.contains("watchlistButton")) {
@@ -188,16 +224,6 @@ spotlightSection.addEventListener("click", function(event) {
         localStorageAddition(localMovie);
     }
 });
-function localStorageAddition(localMovie) {
-    if (localStorage.key(`${localMovie.title}-${localMovie.release}` !== `${localMovie.title}-${localMovie.release}`)) //TODO More flashy error handling needed   
-    alert("item already added to watchlist");
-    else {
-        const uniqueKey = `${localMovie.title}-${localMovie.release}`;
-        localStorage.setItem(uniqueKey, JSON.stringify(localMovie));
-        console.log("Item succesfully put in localStorage");
-        displayWatchlist();
-    }
-}
 //* Function that is tied to the remove button, so you can remove Movies in your watchlist. 
 watchListContainer.addEventListener("click", function(event) {
     console.log("remove button pressed");
@@ -220,6 +246,16 @@ watchListContainer.addEventListener("click", function(event) {
         localStorageSubtraction(localMovie, movieContainer);
     }
 });
+function localStorageAddition(localMovie) {
+    if (localStorage.key(`${localMovie.title}-${localMovie.release}` !== `${localMovie.title}-${localMovie.release}`)) //TODO More flashy error handling needed   
+    alert("item already added to watchlist");
+    else {
+        const uniqueKey = `${localMovie.title}-${localMovie.release}`;
+        localStorage.setItem(uniqueKey, JSON.stringify(localMovie));
+        console.log("Item succesfully put in localStorage");
+        displayWatchlist();
+    }
+}
 function localStorageSubtraction(localMovie, movieContainer) {
     console.log("it came to here");
     //* It takes the keys (title and release) of localMovie. And removes the movie from local Storage, While also removing the movie article container 
@@ -236,6 +272,8 @@ function displayWatchlist() {
         createWatchlistObject(movie);
     }
 }
+//---------------------------
+//* Misc functions-------------------
 function objectCreation(movie) {
     console.log("Object creation function called");
     const generalMovieObject = Object.create(movieObject);
@@ -246,8 +284,8 @@ function objectCreation(movie) {
     generalMovieObject.release = movie.release_date;
     objectManipulationArray.push(generalMovieObject);
 }
-// console.log("objectManipulationArray", objectManipulationArray)
 function apiError(status) {
+    console.log("ApiError function error message");
     switch(status){
         case 401:
             alert("Unauthorized! Check your API key.");
@@ -262,36 +300,44 @@ function apiError(status) {
             alert("Something went wrong.");
     }
 }
-async function movieExploreFetch() {
-    //TODO function fetching pages with option to load more.
-    try {
-        const totalPages = 5;
-        fetchArray = [];
-        for(let i = 1; i <= totalPages; i++){
-            fetchArray.push(fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&include_adult=false&include_video=false&language=en-US&page=${i}&sort_by=popularity.desc`));
-            console.log(`Page: ${i} pushed to be fetched`);
+function filteringSetup() {
+    console.log("filterSetup called");
+    const filterButton1 = document.getElementById("filterButton");
+    const dropdownOptions1 = document.getElementById("dropdownOptions");
+    console.log("dropdownOptions", dropdownOptions1);
+    filteringEventListeners(filterButton1, dropdownOptions1);
+}
+function filteringEventListeners(filterButton1, dropdownOptions1) {
+    console.log("filtering function");
+    //* dropdown is hidden at first, but then filterbutton gets pressed, it adds the class "show" to the dropdownOptions element so it will be unhidden
+    if (filterButton1) filterButton1.addEventListener('click', ()=>{
+        console.log("filter by clicked");
+        // dropdownOptions.setAttribute("class", "show");
+        dropdownOptions1.classList.toggle("show");
+    //Todo convert this to DOM?
+    });
+    //!when button is clicked dropdownOptions class becomes undefined thats the problem
+    if (dropdownOptions1) //removes alternatives
+    document.addEventListener('click', (event)=>{
+        //TODO mouseout event instead on dropdownOpt
+        if (!dropdownOptions1.contains(event.target && event.target !== filterButton1)) {
+            console.log("remove class show");
+            dropdownOptions1.classList.remove('show');
         }
-        const responses = await Promise.all(fetchArray);
-        const rejectedPromise = responses.find((response)=>!response.ok);
-        if (rejectedPromise) {
-            console.error(`Error when fetching pages: ${responses.indexOf(rejectedPromise) + 1} `);
-            apiError(rejectedPromise.status);
-            return;
-        }
-        const movieData = await Promise.all(responses.map((response)=>response.json()));
-        //combines the pages to a single array
-        exploreArray = movieData.flatMap((data)=>data.results);
-        console.log("exploreArray", exploreArray);
-        exploreArray.forEach((movie)=>{
-            createExploreObject(movie);
+    });
+    const filterOptions = dropdownOptions1.querySelectorAll("a");
+    filterOptions.forEach((option)=>{
+        option.addEventListener("click", (event)=>{
+            event.preventDefault();
+            const optionReturn = option.textContent;
+            console.log(`filter option: ${optionReturn} clicked`);
+            // filteredfetch(optionReturn)        
+            dropdownOptions1.classList.remove("show");
         });
-    } catch (error) {
-        console.error("Error fetching data:", error.message);
-        apiError();
-    }
-//TODO Switch for sort by or alike maybe?
-} //*filter by genre for the filter function. 
- //in the same endpoint Check movieobjects key: genre_ids. with a numerical value(or array of several)
+    });
+} //-------------------
+ //*filter by genre for the filter function. 
+ //?in the same endpoint Check movieobjects key: genre_ids. with a numerical value(or array of several)
  // when for example the fantasy genre button should handle an switch case if pressed it should give value of 18 and the fetch paramters will be adjusted accordingly 1
  //! Next step is: 
  // Async planning
