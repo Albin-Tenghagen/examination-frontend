@@ -4,7 +4,7 @@
 74/home/albin/Projekt/chassi/frontend/examination-frontend/dist/explore.html1735858961520611544 0
 72/home/albin/Projekt/chassi/frontend/examination-frontend/dist/index.html1735858961521611613 0
 81/home/albin/Projekt/chassi/frontend/examination-frontend/dist/explore.35dd1c50.js1735858961553613813 0
-83/home/albin/Projekt/chassi/frontend/examination-frontend/dist/index.9345d665.js.map1735859465216571567 0
+83/home/albin/Projekt/chassi/frontend/examination-frontend/dist/index.9345d665.js.map1735889021185295708 0
 80/home/albin/Projekt/chassi/frontend/examination-frontend/dist/index.b2625c6b.css1735858961521611613 0
 59/home/albin/Projekt/chassi/frontend/examination-frontend/js1734724877054524395 1
 61/home/albin/Projekt/chassi/frontend/examination-frontend/Misc1735645314077634860 1
@@ -12,13 +12,13 @@
 60/home/albin/Projekt/chassi/frontend/examination-frontend/css1734724762438011197 1
 70/home/albin/Projekt/chassi/frontend/examination-frontend/css/style.css1735852862051985186 0
 61/home/albin/Projekt/chassi/frontend/examination-frontend/html1734724716656414090 1
-79/home/albin/Projekt/chassi/frontend/examination-frontend/dist/index.9345d665.js1735859465214571514 0
+79/home/albin/Projekt/chassi/frontend/examination-frontend/dist/index.9345d665.js1735889021182295659 0
 85/home/albin/Projekt/chassi/frontend/examination-frontend/dist/explore.35dd1c50.js.map1735858961585616014 0
-68/home/albin/Projekt/chassi/frontend/examination-frontend/js/index.js1735859465110568773 0
+68/home/albin/Projekt/chassi/frontend/examination-frontend/js/index.js1735889021045293426 0
 74/home/albin/Projekt/chassi/frontend/examination-frontend/html/explore.html1735852464149461070 0
 56/home/albin/Projekt/chassi/frontend/examination-frontend1735489557015997565 1
 60/home/albin/Projekt/chassi/frontend/examination-frontend/img1734728524529213417 1
 66/home/albin/Projekt/chassi/frontend/examination-frontend/README.md1734725893571901221 0
 75/home/albin/Projekt/chassi/frontend/examination-frontend/Misc/misc-notes.md1735754634856961363 0
 78/home/albin/Projekt/chassi/frontend/examination-frontend/dist/html.c41be126.js1735858961553613813 0
-61/home/albin/Projekt/chassi/frontend/examination-frontend/dist1735859465216571567 1
+61/home/albin/Projekt/chassi/frontend/examination-frontend/dist1735889021186295724 1

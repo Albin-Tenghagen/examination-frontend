@@ -64,7 +64,7 @@ async function checkUserPage() {
         console.log("user is visiting explore.html")
         console.log("spotlightArray", spotlightArray)
         console.log("filterSetup called from userCheck")
-        filteringSetup(filterButton, dropdownOptions)
+        filteringSetup()
 
        await movieExploreFetch()
        
@@ -153,6 +153,7 @@ async function movieExploreFetch() {
 //-------------------
 
 //* DOM manipulation-------------------
+
 function createSpotlightObject(movie){
     const movieContainer = document.createElement("article")
     movieContainer.setAttribute("class", "movieContainer")
@@ -411,25 +412,19 @@ function filteringEventListeners(filterButton,dropdownOptions) {
             console.log("filter by clicked")
             // dropdownOptions.setAttribute("class", "show");
             dropdownOptions.classList.toggle("show");
+            dropdownOptions.classList.remove("dropdownOptions")
             
         });
     }
-    //? classlist adding is a succes! dropdownOptions get the class show as i want, but i got another error instead
-    //! Uncaught TypeError: Node.contains: Argument 1 is not an object.
-    //!filteringEventListeners index.js:423
-    //!filteringEventListeners index.js:421
-    //!filteringSetup index.js:403
-    //!checkUserPage index.js:67
-    //!setup index.js:44
-    //!EventListener.handleEvent* index.js:42
-    
+
     if (dropdownOptions) {
         //removes alternatives
         document.addEventListener('click', (event) => {
 
-            if (!dropdownOptions.contains(event.target && event.target !== filterButton)) {
+            if (event.target !== filterButton && !dropdownOptions.contains(event.target)) {
                 console.log("remove class show")
                 dropdownOptions.classList.remove('show');
+                dropdownOptions.classList.toggle("dropdownOptions")
             }
         })
     }

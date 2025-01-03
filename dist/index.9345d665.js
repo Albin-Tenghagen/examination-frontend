@@ -42,7 +42,7 @@ async function checkUserPage() {
         console.log("user is visiting explore.html");
         console.log("spotlightArray", spotlightArray);
         console.log("filterSetup called from userCheck");
-        filteringSetup(filterButton, dropdownOptions);
+        filteringSetup();
         await movieExploreFetch();
         if (watchListContainer) displayWatchlist();
     }
@@ -302,37 +302,36 @@ function apiError(status) {
 }
 function filteringSetup() {
     console.log("filterSetup called");
-    const filterButton1 = document.getElementById("filterButton");
-    const dropdownOptions1 = document.getElementById("dropdownOptions");
-    console.log("dropdownOptions", dropdownOptions1);
-    filteringEventListeners(filterButton1, dropdownOptions1);
+    const filterButton = document.getElementById("filterButton");
+    const dropdownOptions = document.getElementById("dropdownOptions");
+    console.log("dropdownOptions", dropdownOptions);
+    filteringEventListeners(filterButton, dropdownOptions);
 }
-function filteringEventListeners(filterButton1, dropdownOptions1) {
+function filteringEventListeners(filterButton, dropdownOptions) {
     console.log("filtering function");
     //* dropdown is hidden at first, but then filterbutton gets pressed, it adds the class "show" to the dropdownOptions element so it will be unhidden
-    if (filterButton1) filterButton1.addEventListener('click', ()=>{
+    if (filterButton) filterButton.addEventListener('click', ()=>{
         console.log("filter by clicked");
         // dropdownOptions.setAttribute("class", "show");
-        dropdownOptions1.classList.toggle("show");
-    //Todo convert this to DOM?
+        dropdownOptions.classList.toggle("show");
+        dropdownOptions.classList.remove("dropdownOptions");
     });
-    //!when button is clicked dropdownOptions class becomes undefined thats the problem
-    if (dropdownOptions1) //removes alternatives
+    if (dropdownOptions) //removes alternatives
     document.addEventListener('click', (event)=>{
-        //TODO mouseout event instead on dropdownOpt
-        if (!dropdownOptions1.contains(event.target && event.target !== filterButton1)) {
+        if (event.target !== filterButton && !dropdownOptions.contains(event.target)) {
             console.log("remove class show");
-            dropdownOptions1.classList.remove('show');
+            dropdownOptions.classList.remove('show');
+            dropdownOptions.classList.toggle("dropdownOptions");
         }
     });
-    const filterOptions = dropdownOptions1.querySelectorAll("a");
+    const filterOptions = dropdownOptions.querySelectorAll("a");
     filterOptions.forEach((option)=>{
         option.addEventListener("click", (event)=>{
             event.preventDefault();
             const optionReturn = option.textContent;
             console.log(`filter option: ${optionReturn} clicked`);
             // filteredfetch(optionReturn)        
-            dropdownOptions1.classList.remove("show");
+            dropdownOptions.classList.remove("show");
         });
     });
 } //-------------------
