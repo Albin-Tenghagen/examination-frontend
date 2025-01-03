@@ -8,10 +8,6 @@ const apiUrl = "https://api.themoviedb.org/3?"
 const exploringEndpoint = "discover/movie"
 const apiKey = "3cb0d2bc09efade109b0b6a67290e815"
 
-//!TA bort?
-let objectManipulationArray = [];
-
-let movieArray = [];
 
 let spotlightArray = [];
 
@@ -35,8 +31,6 @@ const spotlightSection = document.getElementById("spotlightSection");
 
 const watchListContainer = document.getElementById("watchListContainer");
 
-// const exploreContainer = document.getElementById("exploreContainer");
-
 //*---------------
 
 window.addEventListener("DOMContentLoaded", async function setup(event) {
@@ -52,34 +46,37 @@ async function checkUserPage() {
     if(currentPage.endsWith("index.html") ){
         //TODO make it so that spotlight can also be displayed on explore
         console.log("user is visiting index.html")
-        await movieApiFetch()
+        await spotlightApiFetch()
 
-        console.log("exploreArray", exploreArray)
+        console.log("spotlightApiFetch called from checkUserPage")
         
         if (watchListContainer) {
             displayWatchlist();
         }
+        console.log("displayWatchlist called from checkUserPage")
 
     } else {
         console.log("user is visiting explore.html")
-        console.log("spotlightArray", spotlightArray)
-        console.log("filterSetup called from userCheck")
+        
         filteringSetup()
+        console.log("filterSetup called from checkUserPage")
 
-       await movieExploreFetch()
+       await ExploreApiFetch()
+       console.log("ExploreApiFetch called from checkUserPage")
+       
        
        if (watchListContainer) {
          displayWatchlist();
         }
-        
+        console.log("displayWatchlist called from checkUserPage")
     }
     
 }
 
 //* fetch functions-------------------
-//TODO change to be specifiacally spotlight
-async function movieApiFetch() {
-    console.log("fetching data from TMDB API")
+
+async function spotlightApiFetch() {
+    console.log("fetching data from TMDB API: Spotlight Section")
     try {
         const response = await fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&include_adult=false&include_video=false&language=en-US&page=1&sort_by=popularity.desc`)
 
@@ -87,19 +84,16 @@ async function movieApiFetch() {
             apiError(response)
             return;
         }
-        
-        const movieData = await response.json();
-        //TODO remove movie array step
-        movieArray = movieData.results;
-        movieArray.forEach(movie => {
-            objectCreation(movie)
-        })
-        console.log("movieArray", movieArray)
 
-        spotlightArray = movieArray.slice(0, 10)
+        const movieData = await response.json();
+        console.log("spotlight Data succesfullly fetched", movieData)
+        
+        spotlightArray = movieData.results;
+
         console.log("spotlightArray", spotlightArray)
         spotlightArray.forEach(movie => {
             createSpotlightObject(movie)
+    
         });
     
     } catch (err) {
@@ -110,15 +104,15 @@ async function movieApiFetch() {
     }
 }
 
-async function movieExploreFetch() {
-    //TODO function fetching pages with option to load more.
+async function ExploreApiFetch() {
+    //TODO function fetching pages with option to load more. need to incorporate switch case filter handling
+    console.log("fetching data from TMDB API: Spotlight Section")
     try {
         const totalPages = 5 
         fetchArray = [] ;
         for(let i = 1; i <= totalPages; i++){
            
-            fetchArray.push(fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&include_adult=false&include_video=false&language=en-US&page=${i}&sort_by=popularity.desc`))  
-            console.log(`Page: ${i} pushed to be fetched`) 
+            fetchArray.push(fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&include_adult=false&include_video=false&language=en-US&page=${i}&sort_by=popularity.desc`))    
             
         }
 
@@ -131,7 +125,7 @@ async function movieExploreFetch() {
             apiError(rejectedPromise.status)
             return
         }
-        
+        console.log("Explore fetches all succesful")
         const movieData = await Promise.all(responses.map((response) => response.json()))
 
         //combines the pages to a single array
@@ -153,7 +147,7 @@ async function movieExploreFetch() {
 //-------------------
 
 //* DOM manipulation-------------------
-
+    //? FIX SO THE FUNCTION CAN PLACE THE ARTICLES IN DIFFERENT NODES?
 function createSpotlightObject(movie){
     const movieContainer = document.createElement("article")
     movieContainer.setAttribute("class", "movieContainer")
@@ -237,7 +231,6 @@ function createWatchlistObject(movie){
 function createExploreObject(movie) {
     const movieContainer = document.createElement("article")
     movieContainer.setAttribute("class", "movieContainer")
-    //TODO FIX SO THE FUNCTION CAN PLACE THE ARTICLES IN DIFFERENT NODES
     exploreContainer.appendChild(movieContainer)
 
 
@@ -277,7 +270,10 @@ function createExploreObject(movie) {
 //-------------------
 
 //* Watch List ------------------------
+
 //* Function that can save Movies to your watch list by stringifying it to localStorage, and on WindowLoaded should then decypher the data and create DOM elements in the WatchListContainer
+//TODO Savebutton for watchlist needs to be usuable in every movie container. 
+//TODO Also the button needs confirm state if already added 
 spotlightSection.addEventListener("click", function (event){
     if (event.target.classList.contains("watchlistButton")) {
 
@@ -326,6 +322,7 @@ watchListContainer.addEventListener("click", function(event) {
     }
 })
 
+//* Checks localStorage for a key, if the key is already there then the function will alert the user and not add the the movie again. Preventing duplications of items in the watchlist. 
 function localStorageAddition(localMovie){
    if (localStorage.key(`${localMovie.title}-${localMovie.release}` !== `${localMovie.title}-${localMovie.release}`)) {
     //TODO More flashy error handling needed   
@@ -339,6 +336,7 @@ function localStorageAddition(localMovie){
     }
         
 }
+
 function localStorageSubtraction(localMovie, movieContainer) {
     console.log("it came to here")
     //* It takes the keys (title and release) of localMovie. And removes the movie from local Storage, While also removing the movie article container 
@@ -365,19 +363,6 @@ function displayWatchlist(){
 
 
 //* Misc functions-------------------
-function objectCreation(movie){
-    console.log("Object creation function called")
-    const generalMovieObject = Object.create(movieObject)
-    generalMovieObject.id = movie.id
-    generalMovieObject.title = movie.original_title
-    generalMovieObject.overview = movie.overview
-    generalMovieObject.img = movie.poster_path
-    generalMovieObject.release = movie.release_date
-
-    objectManipulationArray.push(generalMovieObject)
-    
-
-}
 
 function apiError(status) {
     console.log("ApiError function error message")
@@ -396,22 +381,23 @@ function apiError(status) {
     }
 }
 
+// dropDown menu for filtering movies
 function filteringSetup(){
-    console.log("filterSetup called")
-    const filterButton = document.getElementById("filterButton")
     //TODO if the filterbutton is pressed twice, two sets of buttons show, might be class and id mixup
+    console.log("filterSetup called")
+
+    const filterButton = document.getElementById("filterButton")
     if (filterButton) {
         filterButton.addEventListener('click', () => {
             console.log("filter by clicked")
-
                         
-            let dropdownOptions = document.getElementById("dropdownOptions")
-            if (!dropdownOptions) {
-                console.log("creating filter UI&UX")
-                dropdownOptions = document.createElement("div")
-                dropdownOptions.setAttribute("class", "dropdownOptions")
+            let dropDownMenu = document.getElementById("dropDownMenu")
+            if (!dropDownMenu) {
+                console.log("creating filter container for menu of categories")
+                dropDownMenu = document.createElement("div")
+                dropDownMenu.setAttribute("id", "dropDownMenu")
 
-               const filterOptions = ["genre 1",
+               const filterCategories = ["genre 1",
                     "genre 2",
                     "genre 3",
                     "genre 4",
@@ -421,33 +407,34 @@ function filteringSetup(){
                     "genre 8",
                 ]
                
-                filterOptions.forEach((genre) => {
-                    const button = document.createElement("button")
-                    button.textContent = genre;
+                filterCategories.forEach((genre) => {
+                    const categoryButton = document.createElement("button")
+                    categoryButton.textContent = genre;
+
                         
-                    button.addEventListener("click", () => {
-                        console.log(`Button clicked: ${button.textContent}`);
+                    categoryButton.addEventListener("click", () => {
+                        console.log(`categoryButton clicked: ${categoryButton.textContent}`);
                         handleUserSelection(genre); // Call function based on button value
-                        dropdownOptions.remove(); // Remove dropdown after selection
+                        dropDownMenu.remove(); // Remove dropdown after selection
                         
                     });
-                    dropdownOptions.appendChild(button);
+                    dropDownMenu.appendChild(categoryButton);
                 });
-                filterButton.parentElement.appendChild(dropdownOptions);
+                filterButton.parentElement.appendChild(dropDownMenu);
             } else {
-                dropdownOptions.remove(); // Toggle visibility by removing
+                dropDownMenu.remove(); // Toggle visibility by removing
             }
         });
     }
     document.addEventListener("click", (event) => {
-        const dropdownOptions = document.getElementById("dropdownOptions");
+        const dropDownMenu = document.getElementById("dropDownMenu");
         if (
-            dropdownOptions &&
-            !dropdownOptions.contains(event.target) &&
+            dropDownMenu &&
+            !dropDownMenu.contains(event.target) &&
             event.target !== filterButton
         ) {
-            console.log("remove dropdownOptions");
-            dropdownOptions.remove();
+            console.log("remove dropDownMenu");
+            dropDownMenu.remove();
         }
     });
 }
