@@ -1,23 +1,4 @@
 body {
   background-color: #faebd7;
 }
-
-#dropdownOptions {
-  width: 250px;
-  box-shadow: var(--shadow);
-  border-radius: var(--radius);
-  visibility: hidden;
-  opacity: 0;
-  background: #fff;
-  margin-top: .3rem;
-  transition: all .1s cubic-bezier(.16, 1, .5, 1);
-  position: absolute;
-  transform: translateY(.5rem);
-}
-
-.show {
-  visibility: visible;
-  opacity: 1;
-  transform: translateY(0);
-}
 /*# sourceMappingURL=index.b2625c6b.css.map */

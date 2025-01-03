@@ -399,50 +399,63 @@ function apiError(status) {
 function filteringSetup(){
     console.log("filterSetup called")
     const filterButton = document.getElementById("filterButton")
-    const dropdownOptions = document.getElementById("dropdownOptions")
-    console.log("dropdownOptions", dropdownOptions)
-    filteringEventListeners(filterButton,dropdownOptions)
-}
-
-function filteringEventListeners(filterButton,dropdownOptions) {
-    console.log("filtering function")
-    //* dropdown is hidden at first, but then filterbutton gets pressed, it adds the class "show" to the dropdownOptions element so it will be unhidden
+    //TODO if the filterbutton is pressed twice, two sets of buttons show, might be class and id mixup
     if (filterButton) {
         filterButton.addEventListener('click', () => {
             console.log("filter by clicked")
-            // dropdownOptions.setAttribute("class", "show");
-            dropdownOptions.classList.toggle("show");
-            dropdownOptions.classList.remove("dropdownOptions")
-            
+
+                        
+            let dropdownOptions = document.getElementById("dropdownOptions")
+            if (!dropdownOptions) {
+                console.log("creating filter UI&UX")
+                dropdownOptions = document.createElement("div")
+                dropdownOptions.setAttribute("class", "dropdownOptions")
+
+               const filterOptions = ["genre 1",
+                    "genre 2",
+                    "genre 3",
+                    "genre 4",
+                    "genre 5",
+                    "genre 6",
+                    "genre 7",
+                    "genre 8",
+                ]
+               
+                filterOptions.forEach((genre) => {
+                    const button = document.createElement("button")
+                    button.textContent = genre;
+                        
+                    button.addEventListener("click", () => {
+                        console.log(`Button clicked: ${button.textContent}`);
+                        handleUserSelection(genre); // Call function based on button value
+                        dropdownOptions.remove(); // Remove dropdown after selection
+                        
+                    });
+                    dropdownOptions.appendChild(button);
+                });
+                filterButton.parentElement.appendChild(dropdownOptions);
+            } else {
+                dropdownOptions.remove(); // Toggle visibility by removing
+            }
         });
     }
-
-    if (dropdownOptions) {
-        //removes alternatives
-        document.addEventListener('click', (event) => {
-
-            if (event.target !== filterButton && !dropdownOptions.contains(event.target)) {
-                console.log("remove class show")
-                dropdownOptions.classList.remove('show');
-                dropdownOptions.classList.toggle("dropdownOptions")
-            }
-        })
-    }
-
-    const filterOptions = dropdownOptions.querySelectorAll("a")
-    filterOptions.forEach((option) => {
-        option.addEventListener("click", (event) => {
-            event.preventDefault()
-            const optionReturn = option.textContent
-            
-            console.log(`filter option: ${optionReturn} clicked`)
-            
-            // filteredfetch(optionReturn)        
-            dropdownOptions.classList.remove("show")
-        }) 
-    })
+    document.addEventListener("click", (event) => {
+        const dropdownOptions = document.getElementById("dropdownOptions");
+        if (
+            dropdownOptions &&
+            !dropdownOptions.contains(event.target) &&
+            event.target !== filterButton
+        ) {
+            console.log("remove dropdownOptions");
+            dropdownOptions.remove();
+        }
+    });
 }
-//-------------------
+
+
+function handleUserSelection(genre) {
+ console.log("handleUserSelection function called with value:", genre)
+}
 
 
 //*filter by genre for the filter function. 

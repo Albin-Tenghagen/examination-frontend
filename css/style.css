@@ -2,7 +2,7 @@ body {
     background-color: antiquewhite;
 }
 
-#dropdownOptions {
+/* #dropdownOptions {
     position: absolute;
     width: 250px;
     box-shadow: var(--shadow);
@@ -20,4 +20,4 @@ body {
     transform: translateY(0rem);
     visibility: visible;
     opacity: 1;
-  }
+  } */
