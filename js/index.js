@@ -58,8 +58,9 @@ async function checkUserPage() {
     } else {
         console.log("user is visiting explore.html")
         
-        filteringSetup()
-        console.log("filterSetup called from checkUserPage")
+        formSubmission()
+        // filteringSetup()
+        // console.log("filterSetup called from checkUserPage")
 
        await ExploreApiFetch("popularity.desc")
        console.log("ExploreApiFetch called from checkUserPage")
@@ -106,7 +107,7 @@ async function spotlightApiFetch() {
     }
 }
 
-async function ExploreApiFetch(sortBy) {
+async function ExploreApiFetch(sorting, filter) {
     //TODO function fetching pages with option to load more. need to incorporate switch case filter handling
     console.log("fetching data from TMDB API: Spotlight Section")
     try {
@@ -115,7 +116,7 @@ async function ExploreApiFetch(sortBy) {
         fetchArray = [] ;
         for(let i = 1; i <= totalPages; i++){
            
-            fetchArray.push(fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&include_adult=false&include_video=false&language=en-US&page=${i}&sort_by=${sortBy}`))    
+            fetchArray.push(fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&include_adult=false&include_video=false&language=en-US&page=${i}&sort_by=${sorting}&with_genre${filter}&vote_count.gte=200`))    
             
         }
 
@@ -159,9 +160,9 @@ function createSpotlightObject(movie){
     spotlightSection.appendChild(movieContainer)
 
 
-    //* original_title
+    //* title
     const movieTitle = document.createElement("h4")
-    movieTitle.textContent = movie.original_title
+    movieTitle.textContent = movie.title
     movieTitle.setAttribute("class", "movieTitle")
     movieContainer.appendChild(movieTitle)
 
@@ -177,7 +178,7 @@ function createSpotlightObject(movie){
     ? `https://image.tmdb.org/t/p/w500${movie.backdrop_path}` 
     : "https://placehold.co/500x281"
     movieImg.setAttribute("src", backdropUrl)
-    movieImg.setAttribute("alt", movie.original_title)
+    movieImg.setAttribute("alt", movie.title)
     movieImg.setAttribute("class", "movieImg")
     movieContainer.appendChild(movieImg)
     
@@ -202,7 +203,7 @@ function createWatchlistObject(movie){
     watchListContainer.appendChild(movieContainer)
 
 
-    //* original_title
+    //* title
     const movieTitle = document.createElement("h4")
     movieTitle.textContent = movie.title
     movieTitle.setAttribute("class", "movieTitle")
@@ -242,9 +243,9 @@ function createExploreObject(movie) {
     exploreContainer.appendChild(movieContainer)
 
 
-    //* original_title
+    //* title
     const movieTitle = document.createElement("h4")
-    movieTitle.textContent = movie.original_title 
+    movieTitle.textContent = movie.title 
     movieTitle.setAttribute("class", "movieTitle")
     movieContainer.appendChild(movieTitle)
 
@@ -260,7 +261,7 @@ function createExploreObject(movie) {
         ? `https://image.tmdb.org/t/p/w500${movie.backdrop_path}` 
         : "https://placehold.co/500x281"
     movieImg.setAttribute("src", backdropUrl) 
-    movieImg.setAttribute("alt", movie.original_title)
+    movieImg.setAttribute("alt", movie.title)
     movieImg.setAttribute("class", "movieImg")
     movieContainer.appendChild(movieImg)
     
@@ -393,82 +394,104 @@ function apiError(status) {
 }
 
 //* dropDown menu for sorting/filtering movies
-function filteringSetup(){
-    console.log("filterSetup called")
+// function filteringSetup(){
+//     console.log("filterSetup called")
 
-    const filterButton = document.getElementById("filterButton")
-    if (filterButton) {
-        filterButton.addEventListener('click', () => {
-            console.log("filterButton pressed")
+//     const filterButton = document.getElementById("filterButton")
+//     if (filterButton) {
+//         filterButton.addEventListener('click', () => {
+//             console.log("filterButton pressed")
                         
-            let dropDownMenu = document.getElementById("dropDownMenu")
-            if (!dropDownMenu) {
-                console.log("dropDownMenu created")
-                dropDownMenu = document.createElement("div")
-                dropDownMenu.setAttribute("id", "dropDownMenu")
+//             let dropDownMenu = document.getElementById("dropDownMenu")
+//             if (!dropDownMenu) {
+//                 console.log("dropDownMenu created")
+//                 dropDownMenu = document.createElement("div")
+//                 dropDownMenu.setAttribute("id", "dropDownMenu")
 
-                const filterCategories = [
-                    { label: "Popularity (Desc)", value: "popularity.desc" },
-                    { label: "A-to-Z", value: "original_title.asc" },
-                    { label: "Z-to-A", value: "original_title.desc" },
-                    { label: "Top Rated", value: "vote_average.desc" },
-                ]
+//                 const filterCategories = [
+//                     { label: "Popularity (Desc)", value: "popularity.desc" },
+//                     { label: "A-to-Z", value: "title.asc" },
+//                     { label: "Z-to-A", value: "title.desc" },
+//                     { label: "Top Rated", value: "vote_average.desc" },
+//                 ]
 
                
-                filterCategories.forEach((filterCategory) => {
-                    const categoryButton = document.createElement("button")
-                    categoryButton.textContent = filterCategory.label;
+//                 filterCategories.forEach((filterCategory) => {
+//                     const categoryButton = document.createElement("button")
+//                     categoryButton.textContent = filterCategory.label;
 
-                        categoryButton.addEventListener("click", () => {
-                            console.log(`categoryButton clicked: ${categoryButton.textContent}`);
-                            handleUserSelection(filterCategory.value); // Call function based on button value
-                            dropDownMenu.remove(); // Remove dropdown after selection
+//                         categoryButton.addEventListener("click", () => {
+//                             console.log(`categoryButton clicked: ${categoryButton.textContent}`);
+//                             handleUserSelection(filterCategory.value); // Call function based on button value
+//                             dropDownMenu.remove(); // Remove dropdown after selection
                             
-                        });
+//                         });
 
-                    dropDownMenu.appendChild(categoryButton);
-                });
+//                     dropDownMenu.appendChild(categoryButton);
+//                 });
 
-                filterButton.parentElement.appendChild(dropDownMenu);
-            } else {
-                dropDownMenu.remove(); // Toggle visibility by removing
-            }
-        });
-    }
-    document.addEventListener("click", (event) => {
-        const dropDownMenu = document.getElementById("dropDownMenu");
-        if (
-            dropDownMenu &&
-            !dropDownMenu.contains(event.target) &&
-            event.target !== filterButton
-        ) {
-            console.log("remove dropDownMenu");
-            dropDownMenu.remove();
-        }
-    });
+//                 filterButton.parentElement.appendChild(dropDownMenu);
+//             } else {
+//                 dropDownMenu.remove(); // Toggle visibility by removing
+//             }
+//         });
+//     }
+//     document.addEventListener("click", (event) => {
+//         const dropDownMenu = document.getElementById("dropDownMenu");
+//         if (
+//             dropDownMenu &&
+//             !dropDownMenu.contains(event.target) &&
+//             event.target !== filterButton
+//         ) {
+//             console.log("remove dropDownMenu");
+//             dropDownMenu.remove();
+//         }
+//     });
+// }
+
+function formSubmission() { 
+    console.log("formSubmission called")
+    formContainer = document.getElementById("filterSorting")
+    console.log("formContainer", formContainer)
+
+    if (formContainer) {
+    formContainer.addEventListener("submit", function(event) {
+        event.preventDefault()
+        
+        const sorting = document.getElementById("sortingOptions").value
+        const filter = document.getElementById("filterOptions").value
+        console.log("formValue 2:", filter)
+        console.log("formValue 1:", sorting)
+
+        ExploreApiFetch(sorting,filter)
+    })
 }
 
-function handleUserSelection(filterCategory) {
-    console.log("handleUserSelection function called with value:", filterCategory)
-    switch (filterCategory) {
-        case "original_title.asc":
-            console.log("Sort: A-to-Z");
-            ExploreApiFetch(filterCategory)
-            break;
-        case "original_title.desc":
-            console.log("Sort: Z-to-A");
-            ExploreApiFetch(filterCategory)
-            break;
-        case "popularity.desc":
-            console.log("Sort: Popularity (Desc)");
-            ExploreApiFetch(filterCategory)
-            break;
-        case "vote_average.desc":
-            console.log("Sort: Top Rated");
-            ExploreApiFetch(filterCategory)
-            break;
-        default:
-            console.log("Default case: Invalid category, fallback to popularity.desc");
-            break;
 }
-}
+
+
+
+// function handleUserSelection(filterCategory) {
+//     console.log("handleUserSelection function called with value:", filterCategory)
+//     switch (filterCategory) {
+//         case "title.asc":
+//             console.log("Sort: A-to-Z");
+//             ExploreApiFetch(filterCategory)
+//             break;
+//         case "title.desc":
+//             console.log("Sort: Z-to-A");
+//             ExploreApiFetch(filterCategory)
+//             break;
+//         case "popularity.desc":
+//             console.log("Sort: Popularity (Desc)");
+//             ExploreApiFetch(filterCategory)
+//             break;
+//         case "vote_average.desc":
+//             console.log("Sort: Top Rated");
+//             ExploreApiFetch(filterCategory)
+//             break;
+//         default:
+//             console.log("Default case: Invalid category, fallback to popularity.desc");
+//             break;
+// }
+// }
