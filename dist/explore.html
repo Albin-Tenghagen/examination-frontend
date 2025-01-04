@@ -31,12 +31,9 @@
     <main>
         <section class="mainHeading">
             <h3 class="sectionHeading">Explore our movies</h3>
-            <input class="searchMovieInput" placeholder="Search movie by title">
-            <article class="dropdownContainer">
-                <button id="filterButton">filter by</button>
-                <!-- small decal maybe? -->
-
-                <form id="filterSorting">
+                
+            <form id="filterSorting">
+                
                 <label for="sortingOptions">Sort By</label>
                 <select id="sortingOptions">    
                     <option value="default">Popularity</option>
@@ -44,7 +41,7 @@
                     <option value="title.desc">Z-to-A</option>
                     <option value="vote_average.desc">Top Rated</option>
                 </select>
-                
+
                 <label for="filterOptions">Movie genres</label>
                 <select id="filterOptions">
                     <option value="default">All Genres</option>
@@ -54,9 +51,10 @@
                     <option value="99">Educational movies</option>
                     <option value="53">Thriller</option>
                   </select>
+                
                   <button type="submit">Find movies!</button>
                 </form>
-            </article>    
+            
         </section>
 
         <section id="exploreContainer">

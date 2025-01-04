@@ -35,7 +35,7 @@ async function checkUserPage() {
         console.log("spotlightApiFetch called from checkUserPage");
         if (watchListContainer) displayWatchlist();
         console.log("displayWatchlist called from checkUserPage");
-    } else {
+    } else if (currentPage.endsWith("explore.html")) {
         console.log("user is visiting explore.html");
         formSubmission();
         // filteringSetup()
@@ -53,7 +53,7 @@ async function spotlightApiFetch() {
         //https://developer.themoviedb.org/reference/trending-movies instead
         const response = await fetch(`https://api.themoviedb.org/3/trending/movie/day?api_key=${apiKey}`);
         if (!response.ok) {
-            apiError(response);
+            snackError(response);
             return;
         }
         const movieData = await response.json();
@@ -65,22 +65,58 @@ async function spotlightApiFetch() {
         });
     } catch (err) {
         console.error("Error fetching data:", err.message);
-        apiError();
+        snackError(err.message);
     }
+}
+function toggleMovieOverlay(movieContainer, movie) {
+    // Check if overlay already exists
+    let overlay = movieContainer.querySelector(".movieOverlay");
+    if (!overlay) {
+        // Create overlay
+        overlay = document.createElement("div");
+        overlay.setAttribute("class", "movieOverlay");
+        // Add more detailed information to the overlay
+        const overlayContent = document.createElement("div");
+        overlayContent.setAttribute("class", "overlayContent");
+        // Add detailed movie info to the overlay
+        const detailedInfo = `
+            <h3>${movie.title}</h3>
+            <p><strong>Release Date:</strong> ${movie.release_date}</p>
+            <p><strong>Overview:</strong> ${movie.overview}</p>
+            <img src="https://image.tmdb.org/t/p/w500${movie.backdrop_path}" alt="${movie.title}" />
+            <p><strong>Reviews:</strong>${movie.vote_average}/10</p>
+            <p><strong>Genres:</strong>${movie.genre_ids}</p>
+        `;
+        overlayContent.innerHTML = detailedInfo;
+        // Add a close button to the overlay
+        const closeButton = document.createElement("button");
+        closeButton.textContent = "Close";
+        closeButton.setAttribute("class", "closeOverlay");
+        closeButton.addEventListener("click", ()=>{
+            overlay.remove(); // Remove overlay when close button is clicked
+        });
+        overlayContent.appendChild(closeButton);
+        overlay.appendChild(overlayContent);
+        movieContainer.appendChild(overlay);
+    } else // If overlay already exists, remove it
+    overlay.remove();
 }
 async function ExploreApiFetch(sorting, filter) {
     //TODO function fetching pages with option to load more. need to incorporate switch case filter handling
     console.log("fetching data from TMDB API: Spotlight Section");
     try {
         exploreContainer.replaceChildren();
-        const totalPages = 5;
+        const totalPages = 2;
         fetchArray = [];
-        for(let i = 1; i <= totalPages; i++)fetchArray.push(fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&include_adult=false&include_video=false&language=en-US&page=${i}&sort_by=${sorting}&with_genre${filter}&vote_count.gte=200`));
+        for(let i = 1; i <= totalPages; i++){
+            fetchArray.push(fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&include_adult=false&include_video=false&language=en-US&page=${i}&sort_by=${sorting}&with_genre=${filter}&vote_count.gte=200`));
+            console.log(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&include_adult=false&include_video=false&language=en-US&page=${i}&sort_by=${sorting}&with_genre=${filter}&vote_count.gte=200`);
+        }
         const responses = await Promise.all(fetchArray);
         const rejectedPromise = responses.find((response)=>!response.ok);
         if (rejectedPromise) {
             console.error(`Error when fetching pages: ${responses.indexOf(rejectedPromise) + 1} `);
-            apiError(rejectedPromise.status);
+            snackError(rejectedPromise.status);
             return;
         }
         console.log("Explore fetches all succesful");
@@ -93,7 +129,7 @@ async function ExploreApiFetch(sorting, filter) {
         });
     } catch (error) {
         console.error("Error fetching data:", error.message);
-        apiError();
+        snackError();
     }
 }
 //-------------------
@@ -130,6 +166,7 @@ function createSpotlightObject(movie) {
     movieRelease.textContent = movie.release_date;
     movieRelease.setAttribute("class", "movieRelease");
     movieContainer.appendChild(movieRelease);
+    movieContainer.addEventListener("click", ()=>toggleMovieOverlay(movieContainer, movie));
 }
 function createWatchlistObject(movie) {
     const movieContainer = document.createElement("article");
@@ -244,9 +281,14 @@ watchListContainer.addEventListener("click", function(event) {
 });
 //* Checks localStorage for a key, if the key is already there then the function will alert the user and not add the the movie again. Preventing duplications of items in the watchlist. 
 function localStorageAddition(localMovie) {
-    if (localStorage.key(`${localMovie.title}-${localMovie.release}` !== `${localMovie.title}-${localMovie.release}`)) //TODO More flashy error handling needed   
-    alert("item already added to watchlist");
-    else {
+    if (localStorage.key(`${localMovie.title}-${localMovie.release}` !== `${localMovie.title}-${localMovie.release}`)) {
+        //TODO More flashy error handling needed   
+        // alert("item already added to watchlist")
+        let fakeResponse = {
+            "status": "wle"
+        };
+        snackError(fakeResponse);
+    } else {
         const uniqueKey = `${localMovie.title}-${localMovie.release}`;
         localStorage.setItem(uniqueKey, JSON.stringify(localMovie));
         console.log("Item succesfully put in localStorage");
@@ -271,68 +313,38 @@ function displayWatchlist() {
 }
 //---------------------------
 //* Misc functions-------------------
-function apiError(status) {
+function snackError(response) {
     console.log("ApiError function error message");
+    let status = response['status'];
+    console.log(response);
+    console.log(status);
+    const snackbar = document.getElementById('snackbar');
+    // Set the message
     switch(status){
         case 401:
-            alert("Unauthorized! Check your API key.");
+            snackbar.textContent = "Unauthorized! Check your API key.";
             break;
         case 404:
-            alert("Resource not found!");
+            snackbar.textContent = "Resource not found!";
             break;
         case 500:
-            alert("Server error. Try again later.");
+            snackbar.textContent = "Server error. Try again later.";
+            break;
+        case "wle":
+            /* Watch List item Exists */ snackbar.classList.add('green');
+            snackbar.textContent = "Already added to watch list.";
             break;
         default:
-            alert("Something went wrong.");
+            snackbar.textContent = "Something went wrong.";
     }
+    // Add the "show" class to make it visible
+    snackbar.classList.add('show');
+    // Remove the "show" class after 3 seconds
+    setTimeout(()=>{
+        snackbar.classList.remove('show');
+        snackbar.classList.remove('green');
+    }, 3000);
 }
-//* dropDown menu for sorting/filtering movies
-// function filteringSetup(){
-//     console.log("filterSetup called")
-//     const filterButton = document.getElementById("filterButton")
-//     if (filterButton) {
-//         filterButton.addEventListener('click', () => {
-//             console.log("filterButton pressed")
-//             let dropDownMenu = document.getElementById("dropDownMenu")
-//             if (!dropDownMenu) {
-//                 console.log("dropDownMenu created")
-//                 dropDownMenu = document.createElement("div")
-//                 dropDownMenu.setAttribute("id", "dropDownMenu")
-//                 const filterCategories = [
-//                     { label: "Popularity (Desc)", value: "popularity.desc" },
-//                     { label: "A-to-Z", value: "title.asc" },
-//                     { label: "Z-to-A", value: "title.desc" },
-//                     { label: "Top Rated", value: "vote_average.desc" },
-//                 ]
-//                 filterCategories.forEach((filterCategory) => {
-//                     const categoryButton = document.createElement("button")
-//                     categoryButton.textContent = filterCategory.label;
-//                         categoryButton.addEventListener("click", () => {
-//                             console.log(`categoryButton clicked: ${categoryButton.textContent}`);
-//                             handleUserSelection(filterCategory.value); // Call function based on button value
-//                             dropDownMenu.remove(); // Remove dropdown after selection
-//                         });
-//                     dropDownMenu.appendChild(categoryButton);
-//                 });
-//                 filterButton.parentElement.appendChild(dropDownMenu);
-//             } else {
-//                 dropDownMenu.remove(); // Toggle visibility by removing
-//             }
-//         });
-//     }
-//     document.addEventListener("click", (event) => {
-//         const dropDownMenu = document.getElementById("dropDownMenu");
-//         if (
-//             dropDownMenu &&
-//             !dropDownMenu.contains(event.target) &&
-//             event.target !== filterButton
-//         ) {
-//             console.log("remove dropDownMenu");
-//             dropDownMenu.remove();
-//         }
-//     });
-// }
 function formSubmission() {
     console.log("formSubmission called");
     formContainer = document.getElementById("filterSorting");
@@ -345,29 +357,7 @@ function formSubmission() {
         console.log("formValue 1:", sorting);
         ExploreApiFetch(sorting, filter);
     });
-} // function handleUserSelection(filterCategory) {
- //     console.log("handleUserSelection function called with value:", filterCategory)
- //     switch (filterCategory) {
- //         case "title.asc":
- //             console.log("Sort: A-to-Z");
- //             ExploreApiFetch(filterCategory)
- //             break;
- //         case "title.desc":
- //             console.log("Sort: Z-to-A");
- //             ExploreApiFetch(filterCategory)
- //             break;
- //         case "popularity.desc":
- //             console.log("Sort: Popularity (Desc)");
- //             ExploreApiFetch(filterCategory)
- //             break;
- //         case "vote_average.desc":
- //             console.log("Sort: Top Rated");
- //             ExploreApiFetch(filterCategory)
- //             break;
- //         default:
- //             console.log("Default case: Invalid category, fallback to popularity.desc");
- //             break;
- // }
- // }
+}
+console.log("JavaScript file loaded correctly");
 
 //# sourceMappingURL=index.9345d665.js.map
