@@ -61,7 +61,7 @@ async function checkUserPage() {
         filteringSetup()
         console.log("filterSetup called from checkUserPage")
 
-       await ExploreApiFetch()
+       await ExploreApiFetch("popularity.desc")
        console.log("ExploreApiFetch called from checkUserPage")
        
        
@@ -78,7 +78,9 @@ async function checkUserPage() {
 async function spotlightApiFetch() {
     console.log("fetching data from TMDB API: Spotlight Section")
     try {
-        const response = await fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&include_adult=false&include_video=false&language=en-US&page=1&sort_by=popularity.desc`)
+
+        //https://developer.themoviedb.org/reference/trending-movies instead
+        const response = await fetch(`https://api.themoviedb.org/3/trending/movie/day?api_key=${apiKey}`)
 
         if(!response.ok){
             apiError(response)
@@ -104,15 +106,16 @@ async function spotlightApiFetch() {
     }
 }
 
-async function ExploreApiFetch() {
+async function ExploreApiFetch(sortBy) {
     //TODO function fetching pages with option to load more. need to incorporate switch case filter handling
     console.log("fetching data from TMDB API: Spotlight Section")
     try {
+        exploreContainer.replaceChildren()
         const totalPages = 5 
         fetchArray = [] ;
         for(let i = 1; i <= totalPages; i++){
            
-            fetchArray.push(fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&include_adult=false&include_video=false&language=en-US&page=${i}&sort_by=popularity.desc`))    
+            fetchArray.push(fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&include_adult=false&include_video=false&language=en-US&page=${i}&sort_by=${sortBy}`))    
             
         }
 
@@ -142,16 +145,17 @@ async function ExploreApiFetch() {
         apiError()
     }
                 
-    //TODO Switch for sort by or alike maybe?
+   
 }
 //-------------------
 
 //* DOM manipulation-------------------
-    //? FIX SO THE FUNCTION CAN PLACE THE ARTICLES IN DIFFERENT NODES?
+
 function createSpotlightObject(movie){
+    const backdropPath = movie.backdrop_path
+
     const movieContainer = document.createElement("article")
     movieContainer.setAttribute("class", "movieContainer")
-    //TODO FIX SO THE FUNCTION CAN PLACE THE ARTICLES IN DIFFERENT NODES
     spotlightSection.appendChild(movieContainer)
 
 
@@ -166,10 +170,13 @@ function createSpotlightObject(movie){
     watchlistButton.setAttribute("class", "watchlistButton")
     watchlistButton.textContent = "Add to Watchlist"
     movieContainer.appendChild(watchlistButton)
-
+    
     //* backdrop_path 
     const movieImg = document.createElement("img") 
-    movieImg.setAttribute("src", `https://image.tmdb.org/t/p/w500${movie.poster_path}`)
+    const backdropUrl = movie.backdrop_path 
+    ? `https://image.tmdb.org/t/p/w500${movie.backdrop_path}` 
+    : "https://placehold.co/500x281"
+    movieImg.setAttribute("src", backdropUrl)
     movieImg.setAttribute("alt", movie.original_title)
     movieImg.setAttribute("class", "movieImg")
     movieContainer.appendChild(movieImg)
@@ -229,6 +236,7 @@ function createWatchlistObject(movie){
 
 }
 function createExploreObject(movie) {
+   
     const movieContainer = document.createElement("article")
     movieContainer.setAttribute("class", "movieContainer")
     exploreContainer.appendChild(movieContainer)
@@ -236,7 +244,7 @@ function createExploreObject(movie) {
 
     //* original_title
     const movieTitle = document.createElement("h4")
-    movieTitle.textContent = movie.original_title
+    movieTitle.textContent = movie.original_title 
     movieTitle.setAttribute("class", "movieTitle")
     movieContainer.appendChild(movieTitle)
 
@@ -248,7 +256,10 @@ function createExploreObject(movie) {
 
     //* backdrop_path 
     const movieImg = document.createElement("img") 
-    movieImg.setAttribute("src", `https://image.tmdb.org/t/p/w500${movie.poster_path}`)
+    const backdropUrl = movie.backdrop_path 
+        ? `https://image.tmdb.org/t/p/w500${movie.backdrop_path}` 
+        : "https://placehold.co/500x281"
+    movieImg.setAttribute("src", backdropUrl) 
     movieImg.setAttribute("alt", movie.original_title)
     movieImg.setAttribute("class", "movieImg")
     movieContainer.appendChild(movieImg)
@@ -381,45 +392,43 @@ function apiError(status) {
     }
 }
 
-// dropDown menu for filtering movies
+//* dropDown menu for sorting/filtering movies
 function filteringSetup(){
-    //TODO if the filterbutton is pressed twice, two sets of buttons show, might be class and id mixup
     console.log("filterSetup called")
 
     const filterButton = document.getElementById("filterButton")
     if (filterButton) {
         filterButton.addEventListener('click', () => {
-            console.log("filter by clicked")
+            console.log("filterButton pressed")
                         
             let dropDownMenu = document.getElementById("dropDownMenu")
             if (!dropDownMenu) {
-                console.log("creating filter container for menu of categories")
+                console.log("dropDownMenu created")
                 dropDownMenu = document.createElement("div")
                 dropDownMenu.setAttribute("id", "dropDownMenu")
 
-               const filterCategories = ["genre 1",
-                    "genre 2",
-                    "genre 3",
-                    "genre 4",
-                    "genre 5",
-                    "genre 6",
-                    "genre 7",
-                    "genre 8",
+                const filterCategories = [
+                    { label: "Popularity (Desc)", value: "popularity.desc" },
+                    { label: "A-to-Z", value: "original_title.asc" },
+                    { label: "Z-to-A", value: "original_title.desc" },
+                    { label: "Top Rated", value: "vote_average.desc" },
                 ]
-               
-                filterCategories.forEach((genre) => {
-                    const categoryButton = document.createElement("button")
-                    categoryButton.textContent = genre;
 
-                        
-                    categoryButton.addEventListener("click", () => {
-                        console.log(`categoryButton clicked: ${categoryButton.textContent}`);
-                        handleUserSelection(genre); // Call function based on button value
-                        dropDownMenu.remove(); // Remove dropdown after selection
-                        
-                    });
+               
+                filterCategories.forEach((filterCategory) => {
+                    const categoryButton = document.createElement("button")
+                    categoryButton.textContent = filterCategory.label;
+
+                        categoryButton.addEventListener("click", () => {
+                            console.log(`categoryButton clicked: ${categoryButton.textContent}`);
+                            handleUserSelection(filterCategory.value); // Call function based on button value
+                            dropDownMenu.remove(); // Remove dropdown after selection
+                            
+                        });
+
                     dropDownMenu.appendChild(categoryButton);
                 });
+
                 filterButton.parentElement.appendChild(dropDownMenu);
             } else {
                 dropDownMenu.remove(); // Toggle visibility by removing
@@ -439,55 +448,27 @@ function filteringSetup(){
     });
 }
 
-
-function handleUserSelection(genre) {
- console.log("handleUserSelection function called with value:", genre)
+function handleUserSelection(filterCategory) {
+    console.log("handleUserSelection function called with value:", filterCategory)
+    switch (filterCategory) {
+        case "original_title.asc":
+            console.log("Sort: A-to-Z");
+            ExploreApiFetch(filterCategory)
+            break;
+        case "original_title.desc":
+            console.log("Sort: Z-to-A");
+            ExploreApiFetch(filterCategory)
+            break;
+        case "popularity.desc":
+            console.log("Sort: Popularity (Desc)");
+            ExploreApiFetch(filterCategory)
+            break;
+        case "vote_average.desc":
+            console.log("Sort: Top Rated");
+            ExploreApiFetch(filterCategory)
+            break;
+        default:
+            console.log("Default case: Invalid category, fallback to popularity.desc");
+            break;
 }
-
-
-//*filter by genre for the filter function. 
-//?in the same endpoint Check movieobjects key: genre_ids. with a numerical value(or array of several)
-
-// when for example the fantasy genre button should handle an switch case if pressed it should give value of 18 and the fetch paramters will be adjusted accordingly 1
-
-
-            //! Next step is: 
-            // Async planning
-            
-            // SÅ SOM
-            //             OBS!    [filter by],
-                        
-            //             filter by  in exploringContainer.
-            //             When the user presses filter by button (onclick)
-                        
-            //             Dropdown nodeElement shoud display 4 or more buttons for different  parameters 
-            //             they should be handled with a switch case to get the corresponding endpoint/parameter
-                        
-            //             possible endpoint = https://developer.themoviedb.org/reference/genre-movie-list 
-                        
-            //             possible endpoint https://developer.themoviedb.org/reference/discover-movie
-            
-            //             Possible endpoint = https://developer.themoviedb.org/reference/movie-popular-list
-            
-            
-            //             OBS!    [searchinput].
-                            
-            //                 Search endpoint https://developer.themoviedb.org/reference/search-movie
-            
-            
-            //             function that takes user input to search for a movie by title and populates the explore container with possible results
-                        
-            //             headerinput should make a a search in movielist(GlobalSearch) or smth alike, If user on home, open explore tab and results should display in explore
-            
-            //             search inpput in explore --> main section should search by title in current endpoint being displayed(LocalSearch)
-            
-            
-            
-            //             OBS!    [Hämta flera pages från api med promise.all]
-            //             async function that should fetch several pages from the API and handle all the results with promise.all
-            
-            
-            //             OBS! when clicking a movie object, it could fetch the reviews for the movie in a modal of some kind
-            //             https://developer.themoviedb.org/reference/review-details
-                        
-            // }
+}
