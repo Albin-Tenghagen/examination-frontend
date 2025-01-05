@@ -86,11 +86,13 @@ const genresArray = [
       "name": "Western"
     }
 ];
+const genreMapping = genresArray.reduce((map, genre) => {
+    map[genre.id] = genre.name;
+    return map;
+  }, {});
 //*---------------
 
 //*   DOM Creation
-const spotlightSection = document.getElementById("spotlightSection");
-
 const watchListContainer = document.getElementById("watchListContainer");
 
 //*---------------
@@ -204,48 +206,6 @@ async function ExploreApiFetch(sorting, filter) {
 
 //* DOM manipulation-------------------
 
-// function createSpotlightObject(movie){
-
-//     const movieContainer = document.createElement("article")
-//     movieContainer.setAttribute("class", "movieContainer")
-//     // Added movie.id for the overlay function
-//     movieContainer.setAttribute("data-movie-id", movie.id)
-//     spotlightSection.appendChild(movieContainer)
-    
-//     //* title
-//     const movieTitle = document.createElement("h4")
-//     movieTitle.textContent = movie.title
-//     movieTitle.setAttribute("class", "movieTitle")
-//     movieContainer.appendChild(movieTitle)
-
-//     //* Save to localStorage button
-//     const watchlistButton = document.createElement("button")
-//     watchlistButton.setAttribute("class", "watchlistButton")
-//     watchlistButton.textContent = "Add to Watchlist"
-//     movieContainer.appendChild(watchlistButton)
-    
-//     //* backdrop_path 
-//     const movieImg = document.createElement("img") 
-//     const backdropUrl = movie.backdrop_path 
-//     ? `https://image.tmdb.org/t/p/w500${movie.backdrop_path}` 
-//     : "https://placehold.co/500x281"
-//     movieImg.setAttribute("src", backdropUrl)
-//     movieImg.setAttribute("alt", `${movie.title} backdrop`)
-//     movieImg.setAttribute("class", "movieImg")
-//     movieContainer.appendChild(movieImg)
-    
-//     //* overview
-//     const moviePlot = document.createElement("p")
-//     moviePlot.textContent = movie.overview
-//     moviePlot.setAttribute("class", "moviePlot")
-//     movieContainer.appendChild(moviePlot)
-    
-//     //* release_date
-//     const movieRelease = document.createElement("p")
-//     movieRelease.textContent = `Release date :${movie.release_date}`;
-//     movieRelease.setAttribute("class", "movieRelease")
-//     movieContainer.appendChild(movieRelease)
-// }
 function createWatchlistObject(movie){
     const movieContainer = document.createElement("article")
     movieContainer.setAttribute("class", "movieContainer")
@@ -285,51 +245,7 @@ function createWatchlistObject(movie){
     movieRelease.textContent = `Release date :${movie.release}`;
     movieRelease.setAttribute("class", "movieRelease")
     movieContainer.appendChild(movieRelease)
-    }
-// function createExploreObject(movie) {
-   
-//     const movieContainer = document.createElement("article")
-//     movieContainer.setAttribute("class", "movieContainer")
-//     // Added movie.id for the overlay function
-//     movieContainer.setAttribute("data-movie-id", movie.id)
-//     exploreContainer.appendChild(movieContainer)
-    
-//     //* title
-//     const movieTitle = document.createElement("h4")
-//     movieTitle.textContent = movie.title 
-//     movieTitle.setAttribute("class", "movieTitle")
-//     movieContainer.appendChild(movieTitle)
-
-//     //* Save to localStorage button
-//     const watchlistButton = document.createElement("button")
-//     watchlistButton.setAttribute("class", "watchlistButton")
-//     watchlistButton.textContent = "Add to Watchlist"
-//     movieContainer.appendChild(watchlistButton)
-
-//     //* backdrop_path 
-//     const movieImg = document.createElement("img") 
-//     const backdropUrl = movie.backdrop_path 
-//         ? `https://image.tmdb.org/t/p/w500${movie.backdrop_path}` 
-//         : "https://placehold.co/500x281"
-//     movieImg.setAttribute("src", backdropUrl) 
-//     movieImg.setAttribute("alt", movie.title)
-//     movieImg.setAttribute("class", "movieImg")
-//     movieContainer.appendChild(movieImg)
-    
-//     //* overview
-//     const moviePlot = document.createElement("p")
-//     moviePlot.textContent = movie.overview
-//     moviePlot.setAttribute("class", "moviePlot")
-//     movieContainer.appendChild(moviePlot)
-    
-//     //* release_date
-//     const movieRelease = document.createElement("p")
-//     movieRelease.textContent = movie.release_date;
-//     movieRelease.setAttribute("class", "movieRelease")
-//     movieContainer.appendChild(movieRelease)
-    
- 
-// }
+}
 function createMovieElement(movie, container) {
     
     const movieContainer = document.createElement("article")
@@ -354,11 +270,7 @@ function createMovieElement(movie, container) {
     movieRelease.textContent = `Release date :${movie.release_date}`;
     movieRelease.setAttribute("class", "movieRelease")
     movieContainer.appendChild(movieRelease)
-    //* reviews
-    const movieReviews = document.createElement("p")
-    movieRelease.textContent = `Reviews: ${movie.vote_average} / 10`;
-    movieRelease.setAttribute("class", "movieRelease")
-    movieContainer.appendChild(movieRelease)
+   
     //* Save to localStorage button
     const watchlistButton = document.createElement("button")
     watchlistButton.setAttribute("class", "watchlistButton")
@@ -380,6 +292,7 @@ function displayMovies(movies, containerId){
 
     movies.forEach(movie => createMovieElement(movie, container))
 }
+
 function toggleMovieOverlay(movieContainer, movie) {
     // Check if overlay already exists
     let overlay = movieContainer.querySelector(".movieOverlay");
@@ -400,7 +313,7 @@ function toggleMovieOverlay(movieContainer, movie) {
             <p><strong>Overview:</strong> ${movie.overview}</p>
             <img src="https://image.tmdb.org/t/p/w500${movie.backdrop_path}" alt="${movie.title}" />
             <p><strong>Reviews:</strong> ${movie.vote_average}/10</p>
-            <p><strong>Genres:</strong> ${movie.genre_ids}</p>
+            <p><strong>Genres:</strong> ${movie.genre_ids.map(id => genreMapping[id] || "Unknown Genre")}</p>
         `;
         overlayContent.innerHTML = detailedInfo;
 
