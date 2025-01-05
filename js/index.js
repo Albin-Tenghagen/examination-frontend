@@ -8,7 +8,84 @@ let spotlightArray = [];
 let movieWatchListArray = [];
 
 let exploreArray = []; 
-
+const genresArray = [
+    {
+      "id": 28,
+      "name": "Action"
+    },
+    {
+      "id": 12,
+      "name": "Adventure"
+    },
+    {
+      "id": 16,
+      "name": "Animation"
+    },
+    {
+      "id": 35,
+      "name": "Comedy"
+    },
+    {
+      "id": 80,
+      "name": "Crime"
+    },
+    {
+      "id": 99,
+      "name": "Documentary"
+    },
+    {
+      "id": 18,
+      "name": "Drama"
+    },
+    {
+      "id": 10751,
+      "name": "Family"
+    },
+    {
+      "id": 14,
+      "name": "Fantasy"
+    },
+    {
+      "id": 36,
+      "name": "History"
+    },
+    {
+      "id": 27,
+      "name": "Horror"
+    },
+    {
+      "id": 10402,
+      "name": "Music"
+    },
+    {
+      "id": 9648,
+      "name": "Mystery"
+    },
+    {
+      "id": 10749,
+      "name": "Romance"
+    },
+    {
+      "id": 878,
+      "name": "Science Fiction"
+    },
+    {
+      "id": 10770,
+      "name": "TV Movie"
+    },
+    {
+      "id": 53,
+      "name": "Thriller"
+    },
+    {
+      "id": 10752,
+      "name": "War"
+    },
+    {
+      "id": 37,
+      "name": "Western"
+    }
+];
 //*---------------
 
 //*   DOM Creation
@@ -35,9 +112,9 @@ async function checkUserPage() {
 
         console.log("spotlightApiFetch called from checkUserPage")
         
-        if (watchListContainer) {
-            displayWatchlist();
-        }
+        
+        displayWatchlist();
+        
         console.log("displayWatchlist called from checkUserPage")
 
     } else if(currentPage.endsWith("explore.html")){
@@ -48,9 +125,9 @@ async function checkUserPage() {
        await ExploreApiFetch("popularity.desc")
        console.log("ExploreApiFetch called from checkUserPage")
        
-       if (watchListContainer) {
-         displayWatchlist();
-        }
+       
+        displayWatchlist();
+       
         console.log("displayWatchlist called from checkUserPage")
     }
     
@@ -74,10 +151,7 @@ async function spotlightApiFetch() {
         spotlightArray = movieData.results;
 
         console.log("spotlightArray", spotlightArray)
-        spotlightArray.forEach(movie => {
-            createSpotlightObject(movie)
-    
-        });
+        displayMovies(spotlightArray, "spotlightContainer")
     
     } catch (err) {
         
@@ -116,9 +190,7 @@ async function ExploreApiFetch(sorting, filter) {
         exploreArray = movieData.flatMap((data) => data.results);
         
         console.log("exploreArray", exploreArray)
-        exploreArray.forEach(movie => {
-            createExploreObject(movie)
-        })
+        displayMovies(exploreArray, "exploreContainer")
 
         
     } catch (error) {
@@ -132,50 +204,48 @@ async function ExploreApiFetch(sorting, filter) {
 
 //* DOM manipulation-------------------
 
-function createSpotlightObject(movie){
+// function createSpotlightObject(movie){
 
-    const movieContainer = document.createElement("article")
-    movieContainer.setAttribute("class", "movieContainer")
-    // Added movie.id for the overlay function
-    movieContainer.setAttribute("data-movie-id", movie.id)
-    spotlightSection.appendChild(movieContainer)
+//     const movieContainer = document.createElement("article")
+//     movieContainer.setAttribute("class", "movieContainer")
+//     // Added movie.id for the overlay function
+//     movieContainer.setAttribute("data-movie-id", movie.id)
+//     spotlightSection.appendChild(movieContainer)
     
-    //* title
-    const movieTitle = document.createElement("h4")
-    movieTitle.textContent = movie.title
-    movieTitle.setAttribute("class", "movieTitle")
-    movieContainer.appendChild(movieTitle)
+//     //* title
+//     const movieTitle = document.createElement("h4")
+//     movieTitle.textContent = movie.title
+//     movieTitle.setAttribute("class", "movieTitle")
+//     movieContainer.appendChild(movieTitle)
 
-    //* Save to localStorage button
-    const watchlistButton = document.createElement("button")
-    watchlistButton.setAttribute("class", "watchlistButton")
-    watchlistButton.textContent = "Add to Watchlist"
-    movieContainer.appendChild(watchlistButton)
+//     //* Save to localStorage button
+//     const watchlistButton = document.createElement("button")
+//     watchlistButton.setAttribute("class", "watchlistButton")
+//     watchlistButton.textContent = "Add to Watchlist"
+//     movieContainer.appendChild(watchlistButton)
     
-    //* backdrop_path 
-    const movieImg = document.createElement("img") 
-    const backdropUrl = movie.backdrop_path 
-    ? `https://image.tmdb.org/t/p/w500${movie.backdrop_path}` 
-    : "https://placehold.co/500x281"
-    movieImg.setAttribute("src", backdropUrl)
-    movieImg.setAttribute("alt", movie.title)
-    movieImg.setAttribute("class", "movieImg")
-    movieContainer.appendChild(movieImg)
+//     //* backdrop_path 
+//     const movieImg = document.createElement("img") 
+//     const backdropUrl = movie.backdrop_path 
+//     ? `https://image.tmdb.org/t/p/w500${movie.backdrop_path}` 
+//     : "https://placehold.co/500x281"
+//     movieImg.setAttribute("src", backdropUrl)
+//     movieImg.setAttribute("alt", `${movie.title} backdrop`)
+//     movieImg.setAttribute("class", "movieImg")
+//     movieContainer.appendChild(movieImg)
     
-    //* overview
-    const moviePlot = document.createElement("p")
-    moviePlot.textContent = movie.overview
-    moviePlot.setAttribute("class", "moviePlot")
-    movieContainer.appendChild(moviePlot)
+//     //* overview
+//     const moviePlot = document.createElement("p")
+//     moviePlot.textContent = movie.overview
+//     moviePlot.setAttribute("class", "moviePlot")
+//     movieContainer.appendChild(moviePlot)
     
-    //* release_date
-    const movieRelease = document.createElement("p")
-    movieRelease.textContent = movie.release_date;
-    movieRelease.setAttribute("class", "movieRelease")
-    movieContainer.appendChild(movieRelease)
-    
-    
-}
+//     //* release_date
+//     const movieRelease = document.createElement("p")
+//     movieRelease.textContent = `Release date :${movie.release_date}`;
+//     movieRelease.setAttribute("class", "movieRelease")
+//     movieContainer.appendChild(movieRelease)
+// }
 function createWatchlistObject(movie){
     const movieContainer = document.createElement("article")
     movieContainer.setAttribute("class", "movieContainer")
@@ -196,8 +266,11 @@ function createWatchlistObject(movie){
     
     //* backdrop_path 
     const movieImg = document.createElement("img") 
-    movieImg.setAttribute("src", `${movie.img}`)
-    movieImg.setAttribute("alt", movie.title)
+    const backdropUrl = movie.backdrop_path 
+        ? `https://image.tmdb.org/t/p/w500${movie.backdrop_path}` 
+        : "https://placehold.co/500x281"
+    movieImg.setAttribute("src", backdropUrl) 
+    movieImg.setAttribute("alt", `${movie.title} backdrop`)
     movieImg.setAttribute("class", "movieImg")
     movieContainer.appendChild(movieImg)
     
@@ -209,57 +282,104 @@ function createWatchlistObject(movie){
     
     //* release_date
     const movieRelease = document.createElement("p")
-    movieRelease.textContent = movie.release;
+    movieRelease.textContent = `Release date :${movie.release}`;
     movieRelease.setAttribute("class", "movieRelease")
     movieContainer.appendChild(movieRelease)
-    
-
-}
-function createExploreObject(movie) {
+    }
+// function createExploreObject(movie) {
    
+//     const movieContainer = document.createElement("article")
+//     movieContainer.setAttribute("class", "movieContainer")
+//     // Added movie.id for the overlay function
+//     movieContainer.setAttribute("data-movie-id", movie.id)
+//     exploreContainer.appendChild(movieContainer)
+    
+//     //* title
+//     const movieTitle = document.createElement("h4")
+//     movieTitle.textContent = movie.title 
+//     movieTitle.setAttribute("class", "movieTitle")
+//     movieContainer.appendChild(movieTitle)
+
+//     //* Save to localStorage button
+//     const watchlistButton = document.createElement("button")
+//     watchlistButton.setAttribute("class", "watchlistButton")
+//     watchlistButton.textContent = "Add to Watchlist"
+//     movieContainer.appendChild(watchlistButton)
+
+//     //* backdrop_path 
+//     const movieImg = document.createElement("img") 
+//     const backdropUrl = movie.backdrop_path 
+//         ? `https://image.tmdb.org/t/p/w500${movie.backdrop_path}` 
+//         : "https://placehold.co/500x281"
+//     movieImg.setAttribute("src", backdropUrl) 
+//     movieImg.setAttribute("alt", movie.title)
+//     movieImg.setAttribute("class", "movieImg")
+//     movieContainer.appendChild(movieImg)
+    
+//     //* overview
+//     const moviePlot = document.createElement("p")
+//     moviePlot.textContent = movie.overview
+//     moviePlot.setAttribute("class", "moviePlot")
+//     movieContainer.appendChild(moviePlot)
+    
+//     //* release_date
+//     const movieRelease = document.createElement("p")
+//     movieRelease.textContent = movie.release_date;
+//     movieRelease.setAttribute("class", "movieRelease")
+//     movieContainer.appendChild(movieRelease)
+    
+ 
+// }
+function createMovieElement(movie, container) {
+    
     const movieContainer = document.createElement("article")
     movieContainer.setAttribute("class", "movieContainer")
-    // Added movie.id for the overlay function
     movieContainer.setAttribute("data-movie-id", movie.id)
-    exploreContainer.appendChild(movieContainer)
-    
     //* title
     const movieTitle = document.createElement("h4")
-    movieTitle.textContent = movie.title 
+    movieTitle.textContent = movie.title
     movieTitle.setAttribute("class", "movieTitle")
     movieContainer.appendChild(movieTitle)
-
+    //* backdrop_path 
+    const movieImg = document.createElement("img") 
+       const backdropUrl = movie.backdrop_path 
+        ? `https://image.tmdb.org/t/p/w500${movie.backdrop_path}` 
+        : "https://placehold.co/500x281"
+    movieImg.setAttribute("src", backdropUrl)
+    movieImg.setAttribute("alt", `${movie.title} backdrop`)
+    movieImg.setAttribute("class", "movieImg")
+    movieContainer.appendChild(movieImg)
+    //* release_date
+    const movieRelease = document.createElement("p")
+    movieRelease.textContent = `Release date :${movie.release_date}`;
+    movieRelease.setAttribute("class", "movieRelease")
+    movieContainer.appendChild(movieRelease)
+    //* reviews
+    const movieReviews = document.createElement("p")
+    movieRelease.textContent = `Reviews: ${movie.vote_average} / 10`;
+    movieRelease.setAttribute("class", "movieRelease")
+    movieContainer.appendChild(movieRelease)
     //* Save to localStorage button
     const watchlistButton = document.createElement("button")
     watchlistButton.setAttribute("class", "watchlistButton")
     watchlistButton.textContent = "Add to Watchlist"
     movieContainer.appendChild(watchlistButton)
 
-    //* backdrop_path 
-    const movieImg = document.createElement("img") 
-    const backdropUrl = movie.backdrop_path 
-        ? `https://image.tmdb.org/t/p/w500${movie.backdrop_path}` 
-        : "https://placehold.co/500x281"
-    movieImg.setAttribute("src", backdropUrl) 
-    movieImg.setAttribute("alt", movie.title)
-    movieImg.setAttribute("class", "movieImg")
-    movieContainer.appendChild(movieImg)
-    
-    //* overview
-    const moviePlot = document.createElement("p")
-    moviePlot.textContent = movie.overview
-    moviePlot.setAttribute("class", "moviePlot")
-    movieContainer.appendChild(moviePlot)
-    
-    //* release_date
-    const movieRelease = document.createElement("p")
-    movieRelease.textContent = movie.release_date;
-    movieRelease.setAttribute("class", "movieRelease")
-    movieContainer.appendChild(movieRelease)
-    
- 
+    container.appendChild(movieContainer)
 }
+function displayMovies(movies, containerId){
+    //Makes it possible to alter what container to populate
+    const container = document.getElementById(containerId)
 
+    if(!container){
+        console.error("container to populate could not be found");
+        return
+    }
+
+    container.replaceChildren()
+
+    movies.forEach(movie => createMovieElement(movie, container))
+}
 function toggleMovieOverlay(movieContainer, movie) {
     // Check if overlay already exists
     let overlay = movieContainer.querySelector(".movieOverlay");
@@ -389,15 +509,14 @@ function displayWatchlist(){
             const key = localStorage.key(i);
             const movie = JSON.parse(localStorage.getItem(key));
             console.log("WatchlistedMovie", movie)
-            createWatchlistObject(movie)
+             createWatchlistObject(movie)
+            
         }
     }
 
 //---------------------------
 
-
 //* Misc functions-------------------
-
 function snackError(response) {
     console.log("snackError function error message")
     let status = response['status']
@@ -437,7 +556,6 @@ function snackError(response) {
       }, 3000);
 }
 
-
 function formSubmission() { 
     console.log("formSubmission called")
     formContainer = document.getElementById("filterSorting")
@@ -457,6 +575,5 @@ function formSubmission() {
 }
 
 }
-
 
 console.log("JavaScript file loaded correctly")
