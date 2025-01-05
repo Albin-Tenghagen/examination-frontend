@@ -2,22 +2,25 @@ body {
     background-color: antiquewhite;
 }
 
-/* #dropdownOptions {
-    position: absolute;
-    width: 250px;
-    box-shadow: var(--shadow);
-    border-radius: var(--radius);
-    margin-top: 0.3rem;
-    background: white;
-    transition: all 0.1s cubic-bezier(0.16, 1, 0.5, 1);
-  
-    transform: translateY(0.5rem);
-    visibility: hidden;
-    opacity: 0;
-  }
-  
-  .show {
-    transform: translateY(0rem);
-    visibility: visible;
-    opacity: 1;
-  } */
+#snackbar {
+  visibility: hidden;
+  min-width: 250px;
+  margin-left: -125px;
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  border-radius: 5px;
+  padding: 16px;
+  position: fixed;
+  z-index: 1;
+  bottom: 30px;
+  left: 50%;
+  font-size: 17px;
+  transition: visibility 0s, opacity 0.5s linear;
+  opacity: 0;
+}
+
+#snackbar.show {
+  visibility: visible;
+  opacity: 1;
+}
