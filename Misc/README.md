@@ -27,3 +27,12 @@ Presentation (ca 8-10 min):
 - Om du siktar på VG, visa de extra funktionerna du lagt till.
 
 - Var beredd på frågor.
+
+Mål för dagen:
+Förstå de 6 UX/UI-principerna:
+Användarvänlighet
+Konsekvens och standarder
+Estetik och minimalistisk design
+Feedback och kommunikation
+Felprevention och felmeddelanden
+Översikt av tillgänglighet enligt WCAG (kort repetition)

@@ -1,2 +1,5 @@
 .cache
+dist/*
 dist
+.parcel-cache
+.parcel-cache
