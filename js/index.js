@@ -99,7 +99,8 @@ const watchListContainer = document.getElementById("watchListContainer");
 
 window.addEventListener("DOMContentLoaded", async function setup(event) {
     console.log("DOMContentLoaded called")
-    checkUserPage()
+    await checkUserPage()
+    setupEventListener()
 })
 
 async function checkUserPage() {
@@ -339,32 +340,38 @@ function toggleMovieOverlay(movieContainer, movie) {
 //-------------------
 //* Watch List ------------------------
 // Centralised the eventlisteners so the movies on the explore page are also interactable. 
-document.addEventListener("click", function (event) {
-    //* save Movies to your watch list by stringifying it to localStorage
-    if (event.target.classList.contains("watchlistButton")) {
+function setupEventListener() {
 
-        console.log("WatchlistButton pressed just now")
-        // Chooses the elements closest to the watchlistButton that was pressed.
+    document.addEventListener("click", function (event) {
+        //* save Movies to your watch list by stringifying it to localStorage
+        if (event.target.classList.contains("watchlistButton")) {
+            
+            console.log("WatchlistButton pressed just now")
+            // Chooses the elements closest to the watchlistButton that was pressed.
         const movieContainer = event.target.closest(".movieContainer");
-        const movieTitle = movieContainer.querySelector(".movieTitle").textContent;
-        const movieOverview = movieContainer.querySelector(".moviePlot").textContent;
-        const movieRelease = movieContainer.querySelector(".movieRelease").textContent;
-        const movieImg = movieContainer.querySelector(".movieImg").src;
-        
+        const movieId = movieContainer.dataset.movieId
+        console.log("movieId", movieId)
+        const movie = spotlightArray.find((m) => m.id.toString() === movieId) || exploreArray.find((m) => m.id.toString() === movieId )
+        if (!movie) {
+            console.error("Movie not found in arrays:", movieId);
+            return;
+        }
      
      // Create a movie object to stringify to JSON
      const localMovie = {
-         title: movieTitle,
-         overview: movieOverview,
-         release: movieRelease,
-         img: movieImg        
-     }
-     
-     localStorageAddition(localMovie)
+         title: movie.title,
+         img: `https://image.tmdb.org/t/p/w500${movie.backdrop_path}`,    
+         release: movie.release_date,
+         overview: movie.verview,
+         reviews: movie.vote_average,
+         genres: movie.genre_ids
+        }
+        
+        localStorageAddition(localMovie)
     }
     //* Checks localStorage for a key, if the key is already there then the function will alert the user and not add the the movie again.
     if(event.target.classList.contains("removeButton")) {
-        //* And with queryselector it finds the  DOM elements, that are then passed to keys for localMovie
+        
         const movieContainer = event.target.closest(".movieContainer");
         const movieTitle = movieContainer.querySelector(".movieTitle").textContent;
         const movieOverview = movieContainer.querySelector(".moviePlot").textContent;
@@ -392,7 +399,8 @@ document.addEventListener("click", function (event) {
         toggleMovieOverlay(movieContainer, movie);
     }
 });
- 
+
+}
 function localStorageAddition(localMovie){
     const uniqueKey = `${localMovie.title}-${localMovie.release}`
    if (localStorage.getItem(uniqueKey)) {
