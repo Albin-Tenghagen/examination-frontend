@@ -42,17 +42,6 @@ header nav ul {
     background-color: #595F39;
     color: antiquewhite;
 }
-/* button {
-  padding: 2%;
-  box-sizing: content-box;
-  width: 5vw;
-  margin: 1%;
-  text-decoration: none;
-  background-color: #595F39;
-  color: antiquewhite;
-  border-radius: 2rem;
-  cursor: pointer;
-} */
 
 .exploreMain {
   width: 90%;
@@ -188,7 +177,7 @@ footer {
 .overlayContent {
   
   color: #444;
-  margin: 5% auto ;
+  margin-top: 5% auto;
   display: block;
   background-color: #FFF;
   padding: 20px;
@@ -202,8 +191,9 @@ footer {
   max-height: 80%;
   cursor: pointer;
   position: relative;
-  
-  
+  overflow-y: auto;
+  word-wrap: break-word;
+
 }
 
 .closeOverlay {
@@ -220,8 +210,4 @@ footer {
 }
 .dontScroll {
   overflow: hidden;
-}
-
-@media (min-width: 1178px) and (max-width: 1500px) {
-  
 }

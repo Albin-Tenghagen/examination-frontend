@@ -5,8 +5,6 @@ const apiKey = "3cb0d2bc09efade109b0b6a67290e815"
 
 let spotlightArray = [];
 
-let movieWatchListArray = [];
-
 let exploreArray = []; 
 const genresArray = [
     {
@@ -92,10 +90,6 @@ const genreMapping = genresArray.reduce((map, genre) => {
   }, {});
 //*---------------
 
-//*   DOM Creation
-const watchListContainer = document.getElementById("watchListContainer");
-
-//*---------------
 
 window.addEventListener("DOMContentLoaded", async function setup(event) {
     console.log("DOMContentLoaded called")
@@ -117,7 +111,6 @@ async function checkUserPage() {
         console.log("spotlightApiFetch called from checkUserPage")
         
         
-        displayWatchlist();
         
         console.log("displayWatchlist called from checkUserPage")
 
@@ -128,9 +121,6 @@ async function checkUserPage() {
         await ExploreApiFetch("popularity.desc", "")
         formSubmission()
         console.log("ExploreApiFetch called from checkUserPage")
-       
-       
-        displayWatchlist();
        
         console.log("displayWatchlist called from checkUserPage")
     }
@@ -207,46 +197,7 @@ async function ExploreApiFetch(sorting, filter) {
 
 //* DOM manipulation-------------------
 
-function createWatchlistObject(movie){
-    const movieContainer = document.createElement("article")
-    movieContainer.setAttribute("class", "movieContainer")
-    watchListContainer.appendChild(movieContainer)
 
-
-    //* title
-    const movieTitle = document.createElement("h4")
-    movieTitle.textContent = movie.title
-    movieTitle.setAttribute("class", "movieTitle")
-    movieContainer.appendChild(movieTitle)
-
-    //* Save to localStorage button
-    const watchlistButton = document.createElement("button")
-    watchlistButton.setAttribute("class", "removeButton")
-    watchlistButton.textContent = "remove"
-    movieContainer.appendChild(watchlistButton)
-    
-    //* backdrop_path 
-    const movieImg = document.createElement("img") 
-    const backdropUrl = movie.backdrop_path 
-        ? `https://image.tmdb.org/t/p/w500${movie.backdrop_path}` 
-        : "https://placehold.co/500x281"
-    movieImg.setAttribute("src", backdropUrl) 
-    movieImg.setAttribute("alt", `${movie.title} backdrop`)
-    movieImg.setAttribute("class", "movieImg")
-    movieContainer.appendChild(movieImg)
-    
-    //* overview
-    const moviePlot = document.createElement("p")
-    moviePlot.textContent = movie.overview
-    moviePlot.setAttribute("class", "moviePlot")
-    movieContainer.appendChild(moviePlot)
-    
-    //* release_date
-    const movieRelease = document.createElement("p")
-    movieRelease.textContent = `Release date :${movie.release}`;
-    movieRelease.setAttribute("class", "movieRelease")
-    movieContainer.appendChild(movieRelease)
-}
 function createMovieElement(movie, container) {
     
     const movieContainer = document.createElement("article")
@@ -272,12 +223,7 @@ function createMovieElement(movie, container) {
     movieRelease.setAttribute("class", "movieRelease")
     movieContainer.appendChild(movieRelease)
    
-    //* Save to localStorage button
-    const watchlistButton = document.createElement("button")
-    watchlistButton.setAttribute("class", "watchlistButton")
-    watchlistButton.textContent = "Add to Watchlist"
-    movieContainer.appendChild(watchlistButton)
-
+   
     container.appendChild(movieContainer)
 }
 function displayMovies(movies, containerId){
@@ -344,45 +290,8 @@ function toggleMovieOverlay(movieContainer, movie) {
 function setupEventListener() {
 
     document.addEventListener("click", function (event) {
-        //* save Movies to your watch list by stringifying it to localStorage
-        if (event.target.classList.contains("watchlistButton")) {
-            
-            console.log("WatchlistButton pressed just now")
-            // Chooses the elements closest to the watchlistButton that was pressed.
-        const movieContainer = event.target.closest(".movieContainer");
-        const movieId = movieContainer.dataset.movieId
-        console.log("movieId", movieId)
-        const movie = spotlightArray.find((m) => m.id.toString() === movieId) || exploreArray.find((m) => m.id.toString() === movieId )
-        if (!movie) {
-            console.error("Movie not found in arrays:", movieId);
-            return;
-        }
+       
         
-        event.target.textContent = "Added"
-        
-     // Create a movie object to stringify to JSON
-     const localMovie = {
-         movieId: movieId,
-         title: movie.title,
-         img: `https://image.tmdb.org/t/p/w500${movie.backdrop_path}`,    
-         release: movie.release_date,
-         overview: movie.overview,
-         reviews: movie.vote_average,
-         genres: movie.genre_ids
-        }
-        
-        localStorageAddition(localMovie)
-    }
-    //* Checks localStorage for a key, if the key is already there then the function will alert the user and not add the the movie again.
-    if(event.target.classList.contains("removeButton")) {
-        
-
-        const movieContainer = event.target.closest(".movieContainer");
-        const movieId = movieContainer.dataset.movieId
-        //* Calls this function with the parameters of the localMovie Object 
-        localStorageSubtraction(movieId, movieContainer)
-    }
-    //* calls the function toggleMovieOverLay, put in place so only the image calls the function
     if (event.target.classList.contains("movieImg")) {
         const movieContainer = event.target.closest(".movieContainer");
         const movieId = movieContainer.dataset.movieId; //Identifies the movie based on new attribute
@@ -395,45 +304,6 @@ function setupEventListener() {
 });
 
 }
-function localStorageAddition(localMovie){
-    const uniqueKey = localMovie.movieId;
-   if (localStorage.getItem(uniqueKey)) {
-    
-    let fakeResponse = {"status": "wle"}
-    snackError(fakeResponse)
-    
-} else {
-    localStorage.setItem(uniqueKey, JSON.stringify(localMovie))
-    console.log("Item succesfully put in localStorage")
-    displayWatchlist()
-    }
-        
-}
-
-function localStorageSubtraction(movieContainer) {
-    //* It takes the keys (title and release) of localMovie. And removes the movie from local Storage, While also removing the movie article container 
-    const uniqueKey = localMovie.movieId;
-    if (localStorage.getItem(uniqueKey)) {
-        localStorage.removeItem(uniqueKey);
-        watchListContainer.removeChild(movieContainer);
-        console.log("Movie successfully removed from watchlist and localStorage.");
-    } else {
-        console.error("Movie not found in localStorage:", uniqueKey);
-    }
-}
-
-function displayWatchlist(){
-    console.log("Watchlist function called")
-        watchListContainer.replaceChildren()
-
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            const movie = JSON.parse(localStorage.getItem(key));
-            console.log("WatchlistedMovie", movie)
-             createWatchlistObject(movie)
-            
-        }
-    }
 
 //---------------------------
 
