@@ -1,7 +1,7 @@
 //* Global Variables down below
 const apiUrl = "https://api.themoviedb.org/3?"
 const exploringEndpoint = "discover/movie"
-const apiKey = "3cb0d2bc09efade109b0b6a67290e815w"
+const apiKey = "3cb0d2bc09efade109b0b6a67290e815"
 
 let spotlightArray = [];
 
