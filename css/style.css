@@ -6,32 +6,55 @@ body {
   font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
   margin: 0;
   padding: 0;
-  }
+  background-color: #333;
+}
   
-  header {
+header {
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  }
-  .headerHeading{
+  width: 90%;
+  margin: auto;
+  background-color: antiquewhite;
+  border: 1px solid black;
+  border-radius: 2rem;
+}
+.headerHeading{
     font-size: xx-large;
-  }
-  header nav ul {
+}
+header nav ul {
     display: flex;
     align-items: center;
     justify-content: space-around;
     gap: 5%;
     margin-right: 2rem;
-  }
-  .menuButton {
+}
+.menuButton {
     border-radius: 3rem;
     display: inline-block;
-    padding: 6%;
+    box-sizing: content-box;
+    padding: 3%;
     margin: 2vw;
+    width: 5vw;
     text-decoration: none;
-  }
-  .exploreMain {
+    text-align: center;
+    background-color: #595F39;
+    color: antiquewhite;
+}
+/* button {
+  padding: 2%;
+  box-sizing: content-box;
+  width: 5vw;
+  margin: 1%;
+  text-decoration: none;
+  background-color: #595F39;
+  color: antiquewhite;
+  border-radius: 2rem;
+  cursor: pointer;
+} */
+
+.exploreMain {
   width: 90%;
   margin: auto;
   display: grid;
@@ -40,48 +63,90 @@ body {
   grid-template-columns: 1fr 1fr 1fr;
   grid-template-rows: auto 1fr;
   border: 1px solid black;
+  background-color: #595F39;
   border-radius: 2rem;
-  }
-  
-  #spotlightSection {
+}
+
+.mainHeading {
+    min-width: 100%;
+    grid-column-start: 1;
+    grid-column-end: 4;
+    background-color: antiquewhite;
+    border-radius: 2rem;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-evenly;
+    gap: 4%;
+}
+
+#spotlightSection {
+  display: grid;
+  justify-items: center;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto 1fr;
+  width: 90%;
+  background-color: #595F39;
+  margin: auto;
+  border: 1px solid black;
+  border-radius: 2rem;
+}
+#watchlistSection {
   display: grid;
   justify-items: center;
   grid-template-columns: 1fr;
   grid-template-rows: auto 1fr;
   width: 90%;
   margin: auto;
-  border: 1px dotted black;
+  border: 1px solid black;
   border-radius: 2rem;
-  }
-  #exploreContainer {
+}
+
+#exploreContainer {
   grid-row-start: 2;
   grid-column: span 3;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  }
-  #spotlightContainer {
+  background-color: #595F39;
+  border-radius: 2rem;
+  width: 100%;
+}
+#spotlightContainer {
   display: flex;
   margin: auto;
   overflow-x: scroll;
   padding: 1%;
   flex-flow: wrap;
   justify-content: center;
-  }
-  .movieContainer {
+}
+.movieContainer {
   box-sizing: content-box;
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  border: 1px dotted black;
+  border: 1px solid black;
+  border-radius: 2rem;
   margin: .5rem;
-  }
-  
-  .mainHeading {
-    grid-column-start: 2;
-  }
-  
+  background-color: antiquewhite;
+  transition: transform 0.3s ease;
+}
+.movieContainer:hover {
+  transform: translateY(5px);
+}
+footer {
+  width: 90%;
+  background-color: antiquewhite;
+  margin: auto;
+  border: 1px solid black;
+  border-radius: 2rem;
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.movieImg {
+  cursor: pointer;
+}
 
 #snackbar {
   visibility: hidden;
@@ -109,6 +174,7 @@ body {
 .movieOverlay {
   position: fixed;
   top: 0;
+  margin: auto;
   font-size: 5rem;
   color: #333;
   cursor: pointer;
@@ -118,29 +184,44 @@ body {
   background-color: #FFFFFF77;
   box-sizing: content-box;
   
-  }
+}
+.overlayContent {
   
-  .overlayContent {
-  
-  margin: 5% auto auto auto;
+  color: #444;
+  margin: 5% auto ;
   display: block;
   background-color: #FFF;
   padding: 20px;
   font-size: 1.5rem;
-  font-weight: 600;
-  box-sizing: content-box;
+  font-weight: 300;
+  box-sizing: border-box;
   box-shadow: #333;
   border: none;
-  
-  color: #444;
   border-radius: 2rem;
   width: 80%;
-  height: 80%;
+  max-height: 80%;
   cursor: pointer;
+  position: relative;
   
   
-  }
-  
-  .dontScroll {
+}
+
+.closeOverlay {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #f44336;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1rem;
+}
+.dontScroll {
   overflow: hidden;
-  }
+}
+
+@media (min-width: 1178px) and (max-width: 1500px) {
+  
+}

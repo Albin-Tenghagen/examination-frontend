@@ -47,8 +47,8 @@ header nav ul {
   display: grid;
 }
 
-#spotlightSection {
-  border: 1px dotted #000;
+#spotlightSection, #watchlistSection {
+  border: 1px solid #000;
   border-radius: 2rem;
   grid-template-rows: auto 1fr;
   grid-template-columns: 1fr;
@@ -110,6 +110,10 @@ header nav ul {
 #snackbar.show {
   visibility: visible;
   opacity: 1;
+}
+
+.movieImg {
+  cursor: pointer;
 }
 
 .movieOverlay {
