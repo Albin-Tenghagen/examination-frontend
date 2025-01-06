@@ -151,7 +151,6 @@ async function spotlightApiFetch() {
         console.log("spotlight Data succesfullly fetched", movieData)
         
         spotlightArray = movieData.results;
-
         console.log("spotlightArray", spotlightArray)
         displayMovies(spotlightArray, "spotlightContainer")
     
@@ -171,8 +170,8 @@ async function ExploreApiFetch(sorting, filter) {
         fetchArray = [] ;
         for(let i = 1; i <= totalPages; i++){
            
-            fetchArray.push(fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&include_adult=false&include_video=false&language=en-US&page=${i}&sort_by=${sorting}&with_genre=${filter}&vote_count.gte=200`))    
-            console.log(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&include_adult=false&include_video=false&language=en-US&page=${i}&sort_by=${sorting}&with_genre=${filter}&vote_count.gte=200`);    
+            fetchArray.push(fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&include_adult=false&include_video=false&language=en-US&page=${i}&sort_by=${sorting}&with_genres=${filter}&vote_count.gte=200`))    
+            console.log(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&include_adult=false&include_video=false&language=en-US&page=${i}&sort_by=${sorting}&with_genres=${filter}&vote_count.gte=200`);    
             
         }
         
@@ -316,17 +315,21 @@ function toggleMovieOverlay(movieContainer, movie) {
             <p><strong>Genres:</strong> ${movie.genre_ids.map(id => genreMapping[id] || "Unknown Genre")}</p>
         `;
         overlayContent.innerHTML = detailedInfo;
+        let body = document.body;
 
         // Add a close button to the overlay
         const closeButton = document.createElement("button");
         closeButton.textContent = "Close";
         closeButton.setAttribute("class", "closeOverlay");
         closeButton.addEventListener("click", () => {
+            body.classList.remove("dontScroll");
+
             overlay.remove(); // Remove overlay when close button is clicked
         });
         overlayContent.appendChild(closeButton);
 
         overlay.appendChild(overlayContent);
+        body.classList.add("dontScroll");
         movieContainer.appendChild(overlay);
     } else {
         // If overlay already exists, remove it
@@ -356,7 +359,7 @@ document.addEventListener("click", function (event) {
          release: movieRelease,
          img: movieImg        
      }
-     //TODO återkoppling på knappttryck
+     
      localStorageAddition(localMovie)
     }
     //* Checks localStorage for a key, if the key is already there then the function will alert the user and not add the the movie again.

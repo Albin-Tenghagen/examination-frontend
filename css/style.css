@@ -47,3 +47,45 @@ header nav ul {
   opacity: 1;
 }
 
+.movieOverlay {
+
+  position: fixed;
+  top: 0;
+  /* right: 2rem; */
+  font-size: 5rem;
+  color: #333;
+  cursor: pointer;
+  height: 100%;
+  
+  /* padding: 1.75rem 3.5rem; */
+  /* margin: 5rem 2rem; */
+  border: none;
+  background-color: #FFFFFF77;
+  
+  
+  }
+  
+  .overlayContent {
+  
+  margin: 5% auto auto auto;
+  display: block;
+  background-color: #FFF;
+  padding: 20px;
+  font-size: 1.5rem;
+  font-weight: 600;
+  
+  box-shadow: #333;
+  border: none;
+  
+  color: #444;
+  border-radius: 2rem;
+  width: 80%;
+  height: 80%;
+  cursor: pointer;
+  
+  
+  }
+  
+  .dontScroll {
+  overflow: hidden;
+  }

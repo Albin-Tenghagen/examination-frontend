@@ -12,8 +12,8 @@
         
         <nav class="navmenu">
             <ul>
-                <button class="menuButton"><a href="index.html" aria-label="Visit home">Home</a></button>
-                <button class="menuButton"><a href="explore.html" aria-label="Visiting Explore">Explore</a></button>
+                <a class="menuButton" href="index.html" aria-label="Visit home">Home</a>
+                <a class="menuButton" href="explore.html" aria-label="Visiting Explore">Explore</a>
             </ul>
         </nav>
 
@@ -22,9 +22,11 @@
 
     <section id="spotlightSection">
         <h3 class="sectionHeading"> Movies still in the spotlight</h3>
-        <section id="spotlightContainer"></section>
+        <section id="spotlightContainer">
+
+        </section>
     </section>
-    <main>
+    <main class="exploreMain">
         <div id="snackbar"></div>
         <section class="mainHeading">
             <h3 class="sectionHeading">Explore our movies</h3>
@@ -41,7 +43,7 @@
 
                 <label for="filterOptions">Movie genres</label>
                 <select id="filterOptions">
-                    <option value="35,10751,28,99,53">All Genres</option>
+                    <option value="">All Genres</option>
                     <option value="35">Comedy</option>
                     <option value="10751">Family</option>
                     <option value="28">Action</option>

@@ -1,4 +1,79 @@
 body {
+  box-sizing: border-box;
   background-color: #faebd7;
+  min-height: 100vh;
+  font-family: Gill Sans, Gill Sans MT, Calibri, Trebuchet MS, sans-serif;
+}
+
+header {
+  flex-direction: row;
+  align-items: center;
+  display: flex;
+}
+
+header nav ul {
+  justify-content: space-around;
+  align-items: center;
+  gap: 5%;
+  display: flex;
+}
+
+.menuButton {
+  border-radius: 4rem;
+  text-decoration: none;
+}
+
+#snackbar {
+  visibility: hidden;
+  color: #fff;
+  text-align: center;
+  z-index: 1;
+  opacity: 0;
+  background-color: #333;
+  border-radius: 5px;
+  min-width: 250px;
+  margin-left: -125px;
+  padding: 16px;
+  font-size: 17px;
+  transition: visibility, opacity .5s linear;
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+}
+
+#snackbar.show {
+  visibility: visible;
+  opacity: 1;
+}
+
+.movieOverlay {
+  color: #333;
+  cursor: pointer;
+  background-color: #fff7;
+  border: none;
+  height: 100%;
+  font-size: 5rem;
+  position: fixed;
+  top: 0;
+}
+
+.overlayContent {
+  box-shadow: #333;
+  color: #444;
+  cursor: pointer;
+  background-color: #fff;
+  border: none;
+  border-radius: 2rem;
+  width: 80%;
+  height: 80%;
+  margin: 5% auto auto;
+  padding: 20px;
+  font-size: 1.5rem;
+  font-weight: 600;
+  display: block;
+}
+
+.dontScroll {
+  overflow: hidden;
 }
 /*# sourceMappingURL=index.b2625c6b.css.map */
