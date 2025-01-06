@@ -1,7 +1,7 @@
 //* Global Variables down below
 const apiUrl = "https://api.themoviedb.org/3?"
 const exploringEndpoint = "discover/movie"
-const apiKey = "3cb0d2bc09efade109b0b6a67290e815"
+const apiKey = "3cb0d2bc09efade109b0b6a67290e815w"
 
 let spotlightArray = [];
 
@@ -319,16 +319,33 @@ function snackError(response) {
     // Set the message
 
     switch (status) {
+        case 400:
+            snackbar.textContent = "Validation failed";
+            break;
         case 401:
             snackbar.textContent = "Unauthorized! Check your API key.";
             break;
         case 404:
             snackbar.textContent = "Resource not found!";
             break;
+        case 406:
+            snackbar.textContent = "Invalid accept header.";
+            break;
+        case 422:
+            snackbar.textContent =  "Invalid parameters: Your request parameters are incorrect.";
+            break;
+        case 429:
+            snackbar.textContent = "To many requests. Try again much later.";
+            break;
         case 500:
             snackbar.textContent = "Server error. Try again later.";
             break;
-        
+        case 502:
+            snackbar.textContent = "Couldn't connect to the backend server.";
+            break;
+        case 504:
+            snackbar.textContent = "Your request to the backend server timed out. Try again.";
+            break;
         default:
             snackbar.textContent = "Something went wrong. Try again later";
     }
@@ -340,7 +357,7 @@ function snackError(response) {
     setTimeout(() => {
         snackbar.classList.remove('show');
         
-      }, 3000);
+      }, 30000);
 }
 
 function formSubmission() { 
