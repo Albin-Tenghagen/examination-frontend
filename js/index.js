@@ -5,22 +5,97 @@ const apiKey = "3cb0d2bc09efade109b0b6a67290e815"
 
 let spotlightArray = [];
 
-let movieWatchListArray = [];
-
 let exploreArray = []; 
-
+const genresArray = [
+    {
+      "id": 28,
+      "name": "Action"
+    },
+    {
+      "id": 12,
+      "name": "Adventure"
+    },
+    {
+      "id": 16,
+      "name": "Animation"
+    },
+    {
+      "id": 35,
+      "name": "Comedy"
+    },
+    {
+      "id": 80,
+      "name": "Crime"
+    },
+    {
+      "id": 99,
+      "name": "Documentary"
+    },
+    {
+      "id": 18,
+      "name": "Drama"
+    },
+    {
+      "id": 10751,
+      "name": "Family"
+    },
+    {
+      "id": 14,
+      "name": "Fantasy"
+    },
+    {
+      "id": 36,
+      "name": "History"
+    },
+    {
+      "id": 27,
+      "name": "Horror"
+    },
+    {
+      "id": 10402,
+      "name": "Music"
+    },
+    {
+      "id": 9648,
+      "name": "Mystery"
+    },
+    {
+      "id": 10749,
+      "name": "Romance"
+    },
+    {
+      "id": 878,
+      "name": "Science Fiction"
+    },
+    {
+      "id": 10770,
+      "name": "TV Movie"
+    },
+    {
+      "id": 53,
+      "name": "Thriller"
+    },
+    {
+      "id": 10752,
+      "name": "War"
+    },
+    {
+      "id": 37,
+      "name": "Western"
+    }
+];
+const genreMapping = genresArray.reduce((map, genre) => {
+    map[genre.id] = genre.name;
+    return map;
+  }, {});
 //*---------------
 
-//*   DOM Creation
-const spotlightSection = document.getElementById("spotlightSection");
-
-const watchListContainer = document.getElementById("watchListContainer");
-
-//*---------------
 
 window.addEventListener("DOMContentLoaded", async function setup(event) {
     console.log("DOMContentLoaded called")
-    checkUserPage()
+    //Changed to await checkUserPage async fetch functions to complete before the eventListeners are put in place, ensuring that the watchlist button finds the relevant moviecontainer and its attribute data-movie-id
+    await checkUserPage()
+    setupEventListener()
 })
 
 async function checkUserPage() {
@@ -29,28 +104,24 @@ async function checkUserPage() {
     
     //* Calls all relevant functions based on where user is located
     if(currentPage.endsWith("index.html") ){
-        //TODO make it so that spotlight can also be displayed on explore
+        
         console.log("user is visiting index.html")
         await spotlightApiFetch()
 
         console.log("spotlightApiFetch called from checkUserPage")
         
-        if (watchListContainer) {
-            displayWatchlist();
-        }
+        
+        
         console.log("displayWatchlist called from checkUserPage")
 
     } else if(currentPage.endsWith("explore.html")){
         console.log("user is visiting explore.html")
         
+        await spotlightApiFetch() 
+        await ExploreApiFetch("popularity.desc", "")
         formSubmission()
-       await spotlightApiFetch() 
-       await ExploreApiFetch("popularity.desc")
-       console.log("ExploreApiFetch called from checkUserPage")
+        console.log("ExploreApiFetch called from checkUserPage")
        
-       if (watchListContainer) {
-         displayWatchlist();
-        }
         console.log("displayWatchlist called from checkUserPage")
     }
     
@@ -72,12 +143,8 @@ async function spotlightApiFetch() {
         console.log("spotlight Data succesfullly fetched", movieData)
         
         spotlightArray = movieData.results;
-
         console.log("spotlightArray", spotlightArray)
-        spotlightArray.forEach(movie => {
-            createSpotlightObject(movie)
-    
-        });
+        displayMovies(spotlightArray, "spotlightContainer")
     
     } catch (err) {
         
@@ -95,8 +162,8 @@ async function ExploreApiFetch(sorting, filter) {
         fetchArray = [] ;
         for(let i = 1; i <= totalPages; i++){
            
-            fetchArray.push(fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&include_adult=false&include_video=false&language=en-US&page=${i}&sort_by=${sorting}&with_genre=${filter}&vote_count.gte=200`))    
-            console.log(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&include_adult=false&include_video=false&language=en-US&page=${i}&sort_by=${sorting}&with_genre=${filter}&vote_count.gte=200`);    
+            fetchArray.push(fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&include_adult=false&include_video=false&language=en-US&page=${i}&sort_by=${sorting}&with_genres=${filter}&vote_count.gte=200`))    
+            console.log(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&include_adult=false&include_video=false&language=en-US&page=${i}&sort_by=${sorting}&with_genres=${filter}&vote_count.gte=200`);    
             
         }
         
@@ -106,7 +173,7 @@ async function ExploreApiFetch(sorting, filter) {
 
         if(rejectedPromise) {
             console.error(`Error when fetching pages: ${responses.indexOf(rejectedPromise) + 1} `)
-            snackError(rejectedPromise.status)
+            snackError(rejectedPromise)
             return
         }
         console.log("Explore fetches all succesful")
@@ -116,9 +183,7 @@ async function ExploreApiFetch(sorting, filter) {
         exploreArray = movieData.flatMap((data) => data.results);
         
         console.log("exploreArray", exploreArray)
-        exploreArray.forEach(movie => {
-            createExploreObject(movie)
-        })
+        displayMovies(exploreArray, "exploreContainer")
 
         
     } catch (error) {
@@ -132,132 +197,47 @@ async function ExploreApiFetch(sorting, filter) {
 
 //* DOM manipulation-------------------
 
-function createSpotlightObject(movie){
 
+function createMovieElement(movie, container) {
+    
     const movieContainer = document.createElement("article")
     movieContainer.setAttribute("class", "movieContainer")
-    // Added movie.id for the overlay function
     movieContainer.setAttribute("data-movie-id", movie.id)
-    spotlightSection.appendChild(movieContainer)
-    
     //* title
     const movieTitle = document.createElement("h4")
     movieTitle.textContent = movie.title
     movieTitle.setAttribute("class", "movieTitle")
     movieContainer.appendChild(movieTitle)
-
-    //* Save to localStorage button
-    const watchlistButton = document.createElement("button")
-    watchlistButton.setAttribute("class", "watchlistButton")
-    watchlistButton.textContent = "Add to Watchlist"
-    movieContainer.appendChild(watchlistButton)
-    
     //* backdrop_path 
     const movieImg = document.createElement("img") 
-    const backdropUrl = movie.backdrop_path 
-    ? `https://image.tmdb.org/t/p/w500${movie.backdrop_path}` 
-    : "https://placehold.co/500x281"
-    movieImg.setAttribute("src", backdropUrl)
-    movieImg.setAttribute("alt", movie.title)
-    movieImg.setAttribute("class", "movieImg")
-    movieContainer.appendChild(movieImg)
-    
-    //* overview
-    const moviePlot = document.createElement("p")
-    moviePlot.textContent = movie.overview
-    moviePlot.setAttribute("class", "moviePlot")
-    movieContainer.appendChild(moviePlot)
-    
-    //* release_date
-    const movieRelease = document.createElement("p")
-    movieRelease.textContent = movie.release_date;
-    movieRelease.setAttribute("class", "movieRelease")
-    movieContainer.appendChild(movieRelease)
-    
-    
-}
-function createWatchlistObject(movie){
-    const movieContainer = document.createElement("article")
-    movieContainer.setAttribute("class", "movieContainer")
-    watchListContainer.appendChild(movieContainer)
-
-
-    //* title
-    const movieTitle = document.createElement("h4")
-    movieTitle.textContent = movie.title
-    movieTitle.setAttribute("class", "movieTitle")
-    movieContainer.appendChild(movieTitle)
-
-    //* Save to localStorage button
-    const watchlistButton = document.createElement("button")
-    watchlistButton.setAttribute("class", "removeButton")
-    watchlistButton.textContent = "remove"
-    movieContainer.appendChild(watchlistButton)
-    
-    //* backdrop_path 
-    const movieImg = document.createElement("img") 
-    movieImg.setAttribute("src", `${movie.img}`)
-    movieImg.setAttribute("alt", movie.title)
-    movieImg.setAttribute("class", "movieImg")
-    movieContainer.appendChild(movieImg)
-    
-    //* overview
-    const moviePlot = document.createElement("p")
-    moviePlot.textContent = movie.overview
-    moviePlot.setAttribute("class", "moviePlot")
-    movieContainer.appendChild(moviePlot)
-    
-    //* release_date
-    const movieRelease = document.createElement("p")
-    movieRelease.textContent = movie.release;
-    movieRelease.setAttribute("class", "movieRelease")
-    movieContainer.appendChild(movieRelease)
-    
-
-}
-function createExploreObject(movie) {
-   
-    const movieContainer = document.createElement("article")
-    movieContainer.setAttribute("class", "movieContainer")
-    // Added movie.id for the overlay function
-    movieContainer.setAttribute("data-movie-id", movie.id)
-    exploreContainer.appendChild(movieContainer)
-    
-    //* title
-    const movieTitle = document.createElement("h4")
-    movieTitle.textContent = movie.title 
-    movieTitle.setAttribute("class", "movieTitle")
-    movieContainer.appendChild(movieTitle)
-
-    //* Save to localStorage button
-    const watchlistButton = document.createElement("button")
-    watchlistButton.setAttribute("class", "watchlistButton")
-    watchlistButton.textContent = "Add to Watchlist"
-    movieContainer.appendChild(watchlistButton)
-
-    //* backdrop_path 
-    const movieImg = document.createElement("img") 
-    const backdropUrl = movie.backdrop_path 
+       const backdropUrl = movie.backdrop_path 
         ? `https://image.tmdb.org/t/p/w500${movie.backdrop_path}` 
         : "https://placehold.co/500x281"
-    movieImg.setAttribute("src", backdropUrl) 
-    movieImg.setAttribute("alt", movie.title)
+    movieImg.setAttribute("src", backdropUrl)
+    movieImg.setAttribute("alt", `${movie.title} backdrop`)
     movieImg.setAttribute("class", "movieImg")
     movieContainer.appendChild(movieImg)
-    
-    //* overview
-    const moviePlot = document.createElement("p")
-    moviePlot.textContent = movie.overview
-    moviePlot.setAttribute("class", "moviePlot")
-    movieContainer.appendChild(moviePlot)
-    
     //* release_date
     const movieRelease = document.createElement("p")
-    movieRelease.textContent = movie.release_date;
+    movieRelease.textContent = `Release date :${movie.release_date}`;
     movieRelease.setAttribute("class", "movieRelease")
     movieContainer.appendChild(movieRelease)
-    
- 
+   
+   
+    container.appendChild(movieContainer)
+}
+function displayMovies(movies, containerId){
+    //Makes it possible to alter what container to populate
+    const container = document.getElementById(containerId)
+
+    if(!container){
+        console.error("container to populate could not be found");
+        return
+    }
+
+    container.replaceChildren()
+
+    movies.forEach(movie => createMovieElement(movie, container))
 }
 
 function toggleMovieOverlay(movieContainer, movie) {
@@ -280,21 +260,25 @@ function toggleMovieOverlay(movieContainer, movie) {
             <p><strong>Overview:</strong> ${movie.overview}</p>
             <img src="https://image.tmdb.org/t/p/w500${movie.backdrop_path}" alt="${movie.title}" />
             <p><strong>Reviews:</strong> ${movie.vote_average}/10</p>
-            <p><strong>Genres:</strong> ${movie.genre_ids}</p>
+            <p><strong>Genres:</strong> ${movie.genre_ids.map(id => genreMapping[id] || "Unknown Genre")}</p>
         `;
         overlayContent.innerHTML = detailedInfo;
+        let body = document.body;
 
         // Add a close button to the overlay
         const closeButton = document.createElement("button");
         closeButton.textContent = "Close";
         closeButton.setAttribute("class", "closeOverlay");
         closeButton.addEventListener("click", () => {
+            body.classList.remove("dontScroll");
+
             overlay.remove(); // Remove overlay when close button is clicked
         });
         overlayContent.appendChild(closeButton);
 
         overlay.appendChild(overlayContent);
-        movieContainer.appendChild(overlay);
+        body.classList.add("dontScroll");
+        body.appendChild(overlay);
     } else {
         // If overlay already exists, remove it
         overlay.remove();
@@ -302,50 +286,12 @@ function toggleMovieOverlay(movieContainer, movie) {
 }
 //-------------------
 //* Watch List ------------------------
-// Centralised the eventlisteners so the movies on the explore page are also interactable. 
-document.addEventListener("click", function (event) {
-    //* save Movies to your watch list by stringifying it to localStorage
-    if (event.target.classList.contains("watchlistButton")) {
+// Centralised the eventlisteners so the movies on the explore page are also interactable. Put inside a function to wait for arrays to properly 
+function setupEventListener() {
 
-        console.log("WatchlistButton pressed just now")
-        // Chooses the elements closest to the watchlistButton that was pressed.
-        const movieContainer = event.target.closest(".movieContainer");
-        const movieTitle = movieContainer.querySelector(".movieTitle").textContent;
-        const movieOverview = movieContainer.querySelector(".moviePlot").textContent;
-        const movieRelease = movieContainer.querySelector(".movieRelease").textContent;
-        const movieImg = movieContainer.querySelector(".movieImg").src;
+    document.addEventListener("click", function (event) {
+       
         
-     
-     // Create a movie object to stringify to JSON
-     const localMovie = {
-         title: movieTitle,
-         overview: movieOverview,
-         release: movieRelease,
-         img: movieImg        
-     }
-     //TODO återkoppling på knappttryck
-     localStorageAddition(localMovie)
-    }
-    //* Checks localStorage for a key, if the key is already there then the function will alert the user and not add the the movie again.
-    if(event.target.classList.contains("removeButton")) {
-        //* And with queryselector it finds the  DOM elements, that are then passed to keys for localMovie
-        const movieContainer = event.target.closest(".movieContainer");
-        const movieTitle = movieContainer.querySelector(".movieTitle").textContent;
-        const movieOverview = movieContainer.querySelector(".moviePlot").textContent;
-        const movieRelease = movieContainer.querySelector(".movieRelease").textContent;
-        const movieImg = movieContainer.querySelector(".movieImg").src;
-        
-        // Create a movie object to stringify to JSON
-        const localMovie = {
-            title: movieTitle,
-            overview: movieOverview,
-            release: movieRelease,
-            img: movieImg        
-        }
-        //* Calls this function with the parameters of the localMovie Object 
-        localStorageSubtraction(localMovie, movieContainer)
-    }
-    //* calls the function toggleMovieOverLay, put in place so only the image calls the function
     if (event.target.classList.contains("movieImg")) {
         const movieContainer = event.target.closest(".movieContainer");
         const movieId = movieContainer.dataset.movieId; //Identifies the movie based on new attribute
@@ -356,51 +302,15 @@ document.addEventListener("click", function (event) {
         toggleMovieOverlay(movieContainer, movie);
     }
 });
- 
-function localStorageAddition(localMovie){
-    const uniqueKey = `${localMovie.title}-${localMovie.release}`
-   if (localStorage.getItem(uniqueKey)) {
-    
-    let fakeResponse = {"status": "wle"}
-    snackError(fakeResponse)
-    
-} else {
-    localStorage.setItem(uniqueKey, JSON.stringify(localMovie))
-    console.log("Item succesfully put in localStorage")
-    displayWatchlist()
-    }
-        
+
 }
-
-function localStorageSubtraction(localMovie, movieContainer) {
-    //* It takes the keys (title and release) of localMovie. And removes the movie from local Storage, While also removing the movie article container 
-    const uniqueKey = `${localMovie.title}-${localMovie.release}`
-    localStorage.removeItem(uniqueKey)
-
-    watchListContainer.removeChild(movieContainer)
-    console.log("removed from watchlist")
-}
-
-function displayWatchlist(){
-    console.log("Watchlist function called")
-        watchListContainer.replaceChildren()
-
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            const movie = JSON.parse(localStorage.getItem(key));
-            console.log("WatchlistedMovie", movie)
-            createWatchlistObject(movie)
-        }
-    }
 
 //---------------------------
 
-
 //* Misc functions-------------------
-
 function snackError(response) {
     console.log("snackError function error message")
-    let status = response['status']
+    let status = response.status
     console.log(response)
     console.log(status)
 
@@ -418,12 +328,9 @@ function snackError(response) {
         case 500:
             snackbar.textContent = "Server error. Try again later.";
             break;
-        case "wle": /* Watch List item Exists */
-            snackbar.classList.add('green')
-            snackbar.textContent = "Already added to watch list.";
-            break;
+        
         default:
-            snackbar.textContent = "Something went wrong.";
+            snackbar.textContent = "Something went wrong. Try again later";
     }
 
     // Add the "show" class to make it visible
@@ -432,11 +339,9 @@ function snackError(response) {
     // Remove the "show" class after 3 seconds
     setTimeout(() => {
         snackbar.classList.remove('show');
-        snackbar.classList.remove('green');
-
+        
       }, 3000);
 }
-
 
 function formSubmission() { 
     console.log("formSubmission called")
@@ -457,6 +362,5 @@ function formSubmission() {
 }
 
 }
-
 
 console.log("JavaScript file loaded correctly")
